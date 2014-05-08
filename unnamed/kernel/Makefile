@@ -12,7 +12,10 @@ KERNEL_OUTPUT=kernel.bin
 
 LDSCRIPT=kernel.ld
 
-KERNEL_SOURCES=$(wildcard *.c) $(wildcard *.s)
+
+MODULES = mem .
+
+KERNEL_SOURCES=$(foreach module, $(MODULES), $(wildcard $(module)/*.c)) $(wildcard *.s) 
 
 OBJECTS=$(KERNEL_SOURCES:.c=.o)
 OBJECTS := $(OBJECTS:.s=.o)
