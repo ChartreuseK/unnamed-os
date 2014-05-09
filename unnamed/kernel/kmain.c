@@ -1,7 +1,9 @@
 #include <stdint.h>
 
 #include "mem/physical.h"
+#include "mem/virtual.h"
 
+#define PHY_MAP_BASE 	0xFFFFC00000000000ULL
 #define REFK_PHY_MAP_BASE (volatile uint8_t *)0xFFFFC00000000000ULL
 
 #define TEXT_VRAM_BASE              0xB8000
@@ -33,8 +35,34 @@ void kmain(uint64_t  *mem)
 	phymem_align_regions(mem);
 	phymem_mark_all_free(mem);
 
+	dprintf("%x\n",phymem_get_page());
+	dprintf("%x\n",phymem_get_page());
+	dprintf("%x\n",phymem_get_page());
+	dprintf("%x\n",phymem_get_page());
 
+
+	char *test = (char *)(phymem_get_page() + PHY_MAP_BASE);
 	
+	test[0] = 'A';
+	test[1] = 'B';
+	test[2] = '\0';
+	
+	text_putxy(test, 0,1, WHT_ON_BLUE);
+
+	char *test2 = (char*)(phymem_get_page() + PHY_MAP_BASE);
+	
+	test2[0] = 'H';
+	test2[1] = 'e';
+	test2[2] = 'l';
+	test2[3] = 'l'; 
+	test2[4] = 'o';
+	test2[5] = '\0';
+	
+	text_putxy(test2, 0,2, WHT_ON_BLUE);
+	text_putxy(test, 0,3, WHT_ON_BLUE);
+	
+	
+	dprintf("CR3: %x\n", read_cr3);
 
     while(1) {}
 }

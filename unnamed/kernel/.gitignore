@@ -1,2 +1,11 @@
 /kernel.bin
 /depend
+
+
+# Object files
+
+*.o
+
+# Temporary save files
+
+*~
