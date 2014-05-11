@@ -62,12 +62,12 @@ void phymem_align_regions(uint64_t *regions)
 void phymem_mark_all_free(uint64_t *regions)
 {
     uint64_t i;
-    dprintf("Starting to mark free\n");
-    
+    //DEBUG: dprintf("Starting to mark free\n");
+    //DEBUG: dprintf("Kernel: %x, %x\n", (uint64_t)&kernel_pbase, (uint64_t)&_data_end);
     
     for(; *regions != NULL || *(regions + 1) != NULL; regions = regions + 2)
     {
-        dprintf("Region base: %x     Region size: %x\n", *regions, *(regions+1));
+        //DEBUG: dprintf("Region base: %x     Region size: %x\n", *regions, *(regions+1));
         // Go through the region in steps of 4KB
         for(i = 0; i < *(regions + 1); i += 0x1000) 
         {
@@ -79,10 +79,10 @@ void phymem_mark_all_free(uint64_t *regions)
              
             // If not then we can mark the page as free and add it to the linked list
             phymem_mark_free( *regions + i );
-            dprintf("Marked: %x\r", *regions + i);
+            //DEBUG: dprintf("Marked: %x\r", *regions + i);
         }
     }
-    dprintf("\nDone\n");
+    //DEBUG: dprintf("\nDone\n");
 }
 
 
@@ -104,7 +104,7 @@ uint64_t phymem_get_page()
     
     next_free_page = get_next_page(next_free_page);
     
-    dprintf("Gave page: %x\n", page);
+    //DEBUG: dprintf("Gave page: %x\n", page);
     return page;
 }
 

@@ -3,27 +3,42 @@
 
 #define HEAP_BASE 0xFFFFA00000000000
 
-uint64_t curoffset = 0;
+
+
+int64_t curoffset = -1;
 int64_t curpage = -1;
 
 
 // Simple watermark allocator
 void *malloc(uint64_t size)
 {
+    if(curoffset == -1) curoffset = 0;
+    
     void *ptr = NULL;
     
     // If we don't have the current page mapped and allocated
-    if(curpage == -1 || (curoffset + size) > 0x1000)
+    if(curpage == -1 )
+    {
+        if(addmap(phymem_get_page(), HEAP_BASE , MM_READWRITE) == 0)
+        {
+            return NULL;
+        }
+        curpage = 0;
+    }
+    
+    if ((curoffset + size) > 0x1000)
     {
         // Map as many pages as we need to the heap
-        for(unsigned int i = 1; i <= (curoffset + size) / 0x1000; i++)
+        for(unsigned int i = 1; i <= ((curoffset + size) / 0x1000); i++)
         {
-            addmap(phymem_get_page(), HEAP_BASE + ((curpage + i) * 0x1000), 0);
+            if(addmap(phymem_get_page(), HEAP_BASE + ((++curpage) * 0x1000), MM_READWRITE) == 0)
+            {
+                return NULL;
+            }
         }
-    
-        
-        
     }
+    
+    
     
     
     ptr = (void *)(HEAP_BASE + curoffset);

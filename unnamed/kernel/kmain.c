@@ -37,29 +37,8 @@ void kmain(uint64_t  *mem)
     phymem_mark_all_free(mem);
 
 
-	//bootmap();
-
-	uint64_t page = phymem_get_page();
-
 
 	
-	addmap(page, 0x000000000d000000, MM_READWRITE);
-    char *test2 = (char*)0x000000000d000000;
-    
-    dprintf("Before mem write\n");
-    
-    test2[0] = 'H';
-    test2[1] = 'e';
-    test2[2] = 'l';
-    test2[3] = 'l'; 
-    test2[4] = 'o';
-    test2[5] = '\0';
-    
-    dprintf("After mem write\n");
-    
-    text_putxy(test2, 0,2, WHT_ON_BLUE);
-    
-    text_putxy((char*)PHY_MAP_BASE + page, 0, 3, WHT_ON_BLUE);
     
     while(1) {}
 }

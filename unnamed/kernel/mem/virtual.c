@@ -63,6 +63,9 @@ void bootmap()
 					0x40000000 * i | 1);
 	}
 	
+	
+	
+	
 	write_cr3(newpml4);
 	
 	/*for(int i = 0; i < 512; i++)
@@ -70,11 +73,11 @@ void bootmap()
 		phymem_write64( newpml4 + i*8, phymem_read64(oldpml4 + i*8));
 	}
 	
-	dprintf("Before cr3 write\n");
+	//DEBUG: dprintf("Before cr3 write\n");
 	
 	write_cr3(newpml4);
 	
-	dprintf("Wrote new cr3: %x\n", read_cr3());*/
+	//DEBUG: dprintf("Wrote new cr3: %x\n", read_cr3());*/
 	
 }
 
@@ -84,15 +87,15 @@ void bootmap()
 void removemap(uint64_t virtual)
 {
 	uint64_t curlevel, page;
-	dprintf("PML4: %x\n",read_cr3());
+	//DEBUG: dprintf("PML4: %x\n",read_cr3());
 	curlevel = phymem_read64( read_cr3() + (((virtual >> 39) % 512) * 8 ));	// PML4E
-	dprintf("PML4E: %x\n",curlevel);
+	//DEBUG: dprintf("PML4E: %x\n",curlevel);
 	curlevel = phymem_read64( curlevel   + (((virtual >> 30) % 512) * 8));  // PDPTE
-	dprintf("PDPTE: %x\n",curlevel);
+	//DEBUG: dprintf("PDPTE: %x\n",curlevel);
 	curlevel = phymem_read64( curlevel   + (((virtual >> 21) % 512) * 8));	// PDE
-	dprintf("PDE: %x\n",curlevel);
+	//DEBUG: dprintf("PDE: %x\n",curlevel);
 	page 	 = phymem_read64( curlevel   + (((virtual >> 12) % 512) * 8));	// PTE
-	dprintf("PTE: %x\n",page);
+	//DEBUG: dprintf("PTE: %x\n",page);
 	phymem_mark_free(page & ~0xFFF);
 	
 	// And now we zero out the PTE 
@@ -124,7 +127,7 @@ int addmap(uint64_t physical, uint64_t virtual, unsigned int flags)
 	
 	parent = read_cr3();
 	
-	dprintf("CR3: %x\n", read_cr3());
+	//DEBUG: dprintf("CR3: %x\n", read_cr3());
 	/* PML4       read_cr3()
 	 * PDPT[512]    
 	 * PD[512]
@@ -132,15 +135,15 @@ int addmap(uint64_t physical, uint64_t virtual, unsigned int flags)
 	 * P
 	 */
 	
-	for(int l = 3; l > 0; l--)
+	for(int l = 3; l >= 0; l--)
 	{
-		dprintf("In loop %x\n", l);
+		//DEBUG: dprintf("In loop %x\n", l);
 		curlevel = phymem_read64( (parent + indicies[l] * 8));
-		dprintf("curlevel: %x\n", curlevel);
+		//DEBUG: dprintf("curlevel: %x\n", curlevel);
 		if((curlevel & 0x1 ) == 0 || new)
 		{
-			dprintf("Current level not defined: %x\n", curlevel);
-			dprintf("Parent: %x\n", parent);
+			//DEBUG: dprintf("Current level not defined: %x\n", curlevel);
+			//DEBUG: dprintf("Parent: %x\n", parent);
 			// Not present so create a new table
 			curlevel = phymem_get_page();
 			
@@ -158,7 +161,7 @@ int addmap(uint64_t physical, uint64_t virtual, unsigned int flags)
 			phymem_write64( (parent + indicies[l] * 8), 
 						curlevel | flags | 1 );
 					
-			dprintf("Value written: %x\n", phymem_read64( (parent + indicies[l] * 8)));
+			//DEBUG: dprintf("Value written: %x\n", phymem_read64( (parent + indicies[l] * 8)));
 					
 			new = 1;  // We just created one so we need to create all the way down
 		}
