@@ -4,7 +4,7 @@
 
 
 
-#define NULL	0
+#define NULL    0
 
 uint64_t phymem_get_page();
 void phymem_mark_free(uint64_t page);

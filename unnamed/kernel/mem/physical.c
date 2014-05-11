@@ -4,7 +4,7 @@
 // And don't over ride the temp page table from 200000 to 210000
 #define PROTECTED_RAM    0x210000
 
-#define PHY_MAP_BASE 	0xFFFFC00000000000ULL
+#define PHY_MAP_BASE     0xFFFFC00000000000ULL
 
 // Local prototypes
 void set_next_page(uint64_t page, uint64_t next);
@@ -61,36 +61,36 @@ void phymem_align_regions(uint64_t *regions)
  */
 void phymem_mark_all_free(uint64_t *regions)
 {
-	uint64_t i;
-	dprintf("Starting to mark free\n");
-	
-	
+    uint64_t i;
+    dprintf("Starting to mark free\n");
+    
+    
     for(; *regions != NULL || *(regions + 1) != NULL; regions = regions + 2)
     {
-		dprintf("Region base: %x     Region size: %x\n", *regions, *(regions+1));
-		// Go through the region in steps of 4KB
-		for(i = 0; i < *(regions + 1); i += 0x1000) 
-		{
-			// If we're looking at RAM below 2MB 
-			if(( *regions + i )  <=  PROTECTED_RAM) continue;
-			// If we're looking at memory in use by the kernel (where we are loaded)
-			if(( *regions + i )  >=  (uint64_t)&kernel_pbase &&
-			   ( *regions + i )  <=  (uint64_t)&_data_end) continue;
-			 
-			// If not then we can mark the page as free and add it to the linked list
-			phymem_mark_free( *regions + i );
-			dprintf("Marked: %x\r", *regions + i);
-		}
+        dprintf("Region base: %x     Region size: %x\n", *regions, *(regions+1));
+        // Go through the region in steps of 4KB
+        for(i = 0; i < *(regions + 1); i += 0x1000) 
+        {
+            // If we're looking at RAM below 2MB 
+            if(( *regions + i )  <=  PROTECTED_RAM) continue;
+            // If we're looking at memory in use by the kernel (where we are loaded)
+            if(( *regions + i )  >=  (uint64_t)&kernel_pbase &&
+               ( *regions + i )  <=  (uint64_t)&_data_end) continue;
+             
+            // If not then we can mark the page as free and add it to the linked list
+            phymem_mark_free( *regions + i );
+            dprintf("Marked: %x\r", *regions + i);
+        }
     }
-	dprintf("Done\n");
+    dprintf("\nDone\n");
 }
 
 
 void phymem_mark_free(uint64_t page)
 {
-	set_next_page(page, next_free_page);
-	
-	next_free_page = page;
+    set_next_page(page, next_free_page);
+    
+    next_free_page = page;
 }
 
 /* 
@@ -98,26 +98,26 @@ void phymem_mark_free(uint64_t page)
  */
 uint64_t phymem_get_page()
 {
-	uint64_t page;
-	
-	page = next_free_page;
-	
-	next_free_page = get_next_page(next_free_page);
-	
-	dprintf("Gave page: %x\n", page);
-	return page;
+    uint64_t page;
+    
+    page = next_free_page;
+    
+    next_free_page = get_next_page(next_free_page);
+    
+    dprintf("Gave page: %x\n", page);
+    return page;
 }
 
 
 uint64_t get_next_page(uint64_t page)
 {
-	return phymem_read64(page);
+    return phymem_read64(page);
 }
 
 
 void set_next_page(uint64_t page, uint64_t next)
 {
-	phymem_write64(page, next);	
+    phymem_write64(page, next);    
 }
 
 
@@ -126,19 +126,19 @@ void set_next_page(uint64_t page, uint64_t next)
 
 void phymem_write64(uint64_t addr, uint64_t val)
 {
-	*((uint64_t*)PHY_MAP_BASE + addr) = val;	
+    *((uint64_t*)(PHY_MAP_BASE + addr)) = val;    
 }
 
 void phymem_write8(uint64_t addr, uint8_t val)
 {
-	*((uint8_t*)PHY_MAP_BASE + addr) = val;	
+    *((uint8_t*)PHY_MAP_BASE + addr) = val;    
 }
 
 uint64_t phymem_read64(uint64_t addr)
 {
-	return *((uint64_t*)PHY_MAP_BASE + addr);
+    return *((uint64_t*)(PHY_MAP_BASE + addr));
 }
 uint8_t phymem_read8(uint64_t addr)
 {
-	return *((uint8_t*)PHY_MAP_BASE + addr);
+    return *((uint8_t*)PHY_MAP_BASE + addr);
 }
