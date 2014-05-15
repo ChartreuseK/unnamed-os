@@ -4,7 +4,7 @@
 // And don't over ride the temp page table from 200000 to 210000
 #define PROTECTED_RAM    0x210000
 
-#define PHY_MAP_BASE     0xFFFFC00000000000ULL
+
 
 // Local prototypes
 void set_next_page(uint64_t page, uint64_t next);
@@ -17,7 +17,7 @@ extern void dinit();
 
 /* Sidenote remember not to allow the first page so that NULL doesn't become valid */
 uint64_t next_free_page = NULL;
-
+uint64_t last_free_page = NULL;
 
 /* The addresses of these symbols are the start of where the 
  * kernel is loaded and the end of where it is loaded.
@@ -124,21 +124,4 @@ void set_next_page(uint64_t page, uint64_t next)
 
 
 
-void phymem_write64(uint64_t addr, uint64_t val)
-{
-    *((uint64_t*)(PHY_MAP_BASE + addr)) = val;    
-}
 
-void phymem_write8(uint64_t addr, uint8_t val)
-{
-    *((uint8_t*)PHY_MAP_BASE + addr) = val;    
-}
-
-uint64_t phymem_read64(uint64_t addr)
-{
-    return *((uint64_t*)(PHY_MAP_BASE + addr));
-}
-uint8_t phymem_read8(uint64_t addr)
-{
-    return *((uint8_t*)PHY_MAP_BASE + addr);
-}

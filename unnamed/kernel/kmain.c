@@ -3,6 +3,9 @@
 #include "mem/physical.h"
 #include "mem/virtual.h"
 #include "mem/heap.h"
+#include "mem/gdt.h"
+
+#include "hw/interrupts.h"
 
 #define PHY_MAP_BASE     0xFFFFC00000000000ULL
 #define REFK_PHY_MAP_BASE (uint8_t *)0xFFFFC00000000000ULL
@@ -22,7 +25,7 @@ extern void dinit();
 
 void kmain(uint64_t  *mem) 
 {
-    char *hello = "Hello world\0";
+    
 
 
     // Init the serial console
@@ -30,14 +33,17 @@ void kmain(uint64_t  *mem)
 
     // Clear the screen
     text_clrscr();
-
-    text_putxy(hello, 0, 0, WHT_ON_BLUE);
     
     phymem_align_regions(mem);
     phymem_mark_all_free(mem);
 
+	
+    setup_gdt();
+	
 
+	setup_interrupts();
 
+	dprintf("Hello world, 123456789\n");
 	
     
     while(1) {}

@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 
-#include "physical.h"
+#include "mem/physical.h"
 
 enum 
 {

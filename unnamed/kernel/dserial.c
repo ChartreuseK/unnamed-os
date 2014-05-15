@@ -1,6 +1,8 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+#include "hw/ports.h"
+
 #define PORT 0x3f8
 
 uint8_t dio_in(uint16_t port) {
@@ -14,19 +16,19 @@ void dio_out(uint16_t port, uint8_t value) {
 }
 
 void dinit() {
-    dio_out(PORT + 1, 0x00);
-    dio_out(PORT + 3, 0x80);
-    dio_out(PORT + 0, 0x03);
-    dio_out(PORT + 1, 0x00);
-    dio_out(PORT + 3, 0x03);
-    dio_out(PORT + 2, 0xc7);
-    dio_out(PORT + 4, 0x0b);
+    outportb(PORT + 1, 0x00);
+    outportb(PORT + 3, 0x80);
+    outportb(PORT + 0, 0x03);
+    outportb(PORT + 1, 0x00);
+    outportb(PORT + 3, 0x03);
+    outportb(PORT + 2, 0xc7);
+    outportb(PORT + 4, 0x0b);
 }
 
 void dputchar(char c) {
-    while((dio_in(PORT + 5) & 0x20) == 0) ;
+    while((inportb(PORT + 5) & 0x20) == 0) ;
 
-    dio_out(PORT, c);
+    outportb(PORT, c);
 }
 
 void dprintf(const char *msg, ...) {

@@ -1,15 +1,4 @@
-#include "virtual.h"
-
-
-
-struct VirtualAddr
-{
-    void *PML4;                // Pointer to our PML4
-    
-    
-    
-} va;
-
+#include "mem/virtual.h"
 
 
 
@@ -67,8 +56,8 @@ void bootmap()
 	
 	
 	write_cr3(newpml4);
-	
-	/*for(int i = 0; i < 512; i++)
+	/*
+	for(int i = 0; i < 512; i++)
 	{
 		phymem_write64( newpml4 + i*8, phymem_read64(oldpml4 + i*8));
 	}
