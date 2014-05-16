@@ -21,6 +21,8 @@ void ioapic_write(uint32_t index, uint32_t value)
     phymem_write32(ioapic_base + 0x10, value);
 }
 
+
+// Not my code
 void ioapic_set_irq(uint8_t irq, uint64_t apic_id, uint8_t vector) {
     uint32_t low_index = 0x10 + irq*2;
     uint32_t high_index = 0x10 + irq*2 + 1;

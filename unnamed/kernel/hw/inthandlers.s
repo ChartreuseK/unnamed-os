@@ -9,7 +9,7 @@
 
 extern generic_interrupt
 global isr_table
-
+global generic_int_handler
 
 generic_int_handler:
     push    rax

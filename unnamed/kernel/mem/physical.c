@@ -104,7 +104,7 @@ uint64_t phymem_get_page()
     
     next_free_page = get_next_page(next_free_page);
     
-    //DEBUG: dprintf("Gave page: %x\n", page);
+    
     return page;
 }
 

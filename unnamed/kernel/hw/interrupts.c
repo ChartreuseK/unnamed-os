@@ -90,37 +90,53 @@ void setup_interrupts()
     disable_pic();
     enable_local_apic();
     
+    dprintf("\n1");
     
-    uint32_t *idt = (uint32_t *)malloc(256 * 32);    
-    for(int i = 0; i < 256*4; i += 4)
+    
+    uint32_t *idt = (uint32_t *)malloc(256 * 32 );    
+    
+    dprintf("f");
+    dprintf("%x\n",(uint64_t)idt );
+    int i;
+    for(i = 0; i < 256*4; i += 4)
     {
+        
         // First 32 bits 0-15 offset 0-15, 16-31 segment selector
-        idt[i]   = (KERNEL_SEGMENT << 16)      | (isr_table[i] & 0xFFFF);
+        idt[i]   = (KERNEL_SEGMENT << 16)      | (isr_table[i/4] & 0xFFFF);
+        
         // Next 32, 0-15 various flags, 16-31 offset 16-31
         //!! Current hard coded flags are 8 - present
         //!!                              E - Interrupt Gate
         //!!                              0
         //!!                              1 - IST 1
-        idt[i+1] = (isr_table[i] & 0xFFFF0000) | ( 0x8E01 );
+        idt[i+1] = (isr_table[i/4] & 0xFFFF0000) | ( 0x8E01 );
+        
         // Next 32, 0-31 offset 32-63
-        idt[i+2] = (isr_table[i] & 0xFFFFFFFF00000000ULL);
+        idt[i+2] = (isr_table[i/4] & 0xFFFFFFFF00000000ULL) >> 32;
+        
         // Final 32, 0-31 blank
         idt[i+3] = 0;
+        
     }
+    dprintf("%x\n",(uint64_t)idt + i);
+    dprintf("2");
     
     uint8_t idt_pointer[10];
     
     *((uint16_t *)idt_pointer)      = (uint16_t)4095; // Or is it 4096
-    *((uint64_t *)(idt_pointer+2))  = (uint64_t)&idt;
+    *((uint64_t *)(idt_pointer+2))  = (uint64_t)idt;
     
+    dprintf("3");
     
-    __asm__ volatile("lidt [%0]"::"r"(idt)); 
+    __asm__ volatile("lidt [%0]"::"r"(idt_pointer)); 
     
-    
+    dprintf("4");
     
     // Setup TSS here
     uint8_t *tss = malloc(28 * 4); 
     for(int i = 0; i < 28 * 4; i++) tss[i] = 0x00; // Clear out the tss
+    
+    dprintf("5");
     
     for(int i = 0; i < 7; i++)
     {
@@ -129,6 +145,7 @@ void setup_interrupts()
         *(uint64_t*)(tss + 36 + (8 * i)) = (uint64_t)((uint8_t*)malloc(1024) + 1024);
     }
     
+    dprintf("6");
     
     // From notes, no clue what these do
     tss[102] = 0x68;
@@ -136,23 +153,33 @@ void setup_interrupts()
     tss[104] = 0xff;
     tss[105] = 0xff;
     
+    dprintf("7");
+    
     // Add the TSS to a double gdt segment
-    int gdtoffset = append_gdt( ((uint64_t)tss & 0xFFFF) << 16, ((uint64_t)tss & 0xFF0000) | (0x9 << 8) | ((uint64_t)tss & 0xFF000000) << 24);
-    append_gdt( ((uint64_t)tss & 0xFFFFFFFF00000000ULL), 0);
+    uint16_t tss_limit = 28*4;
+    int gdtoffset = append_gdt( (((uint64_t)tss & 0xFFFF) << 16) | (tss_limit), ((uint64_t)tss & 0xFF0000) | BIT(15) | (0x9 << 8) | ((uint64_t)tss & 0xFF000000) << 24);
+    append_gdt( ((uint64_t)tss & 0xFFFFFFFF00000000ULL)>>32, 0);
     
-    __asm__ volatile("ltr %%ax"::"a"(gdtoffset));
+    dprintf("8");
     
-    enable_interrupts();
+    __asm__ volatile("ltr %%ax"::"a"(gdtoffset * 8));
+ 
+    dprintf("9");
+    
+    
     
     setioapicbase();
+    
+    dprintf("a");
     
     // Setup the keyboard IRQ1 to be handled by interrupt 0x40
     ioapic_set_irq(1, APIC_REG_READ(APIC_ID), 0x40);
     
+    dprintf("b");
     
+    enable_interrupts();
     
-    
-    
+    dprintf("c");
     
     
     
@@ -171,6 +198,7 @@ void generic_interrupt(uint64_t intnum)
     switch(intnum)
     {
     case 0x40:          // Keyboard
+    
     
         scancode = inportb(0x60);
         

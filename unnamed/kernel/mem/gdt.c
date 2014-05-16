@@ -40,7 +40,7 @@ void setup_gdt()
 
     add_gdt_entry(0, 0, 0); // NULL Segment 0x0
     
-    add_gdt_entry(1, 0, (1<<15) | (1<<21)); // Code segment 0x8
+    add_gdt_entry(1, 0, (1<<15) | (1<<21) | (1<<11) | (1<<12)); // Code segment 0x8
     
     add_gdt_entry(2, 0, (1<<15) | (1<<9) | (1<<12)); // Code segment 0x10
 

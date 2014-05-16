@@ -23,6 +23,9 @@ void text_putxy(char *str, int x, int y, uint8_t attr);
 extern void dprintf(const char *msg, ...);
 extern void dinit();
 
+
+
+
 void kmain(uint64_t  *mem) 
 {
     
@@ -39,11 +42,16 @@ void kmain(uint64_t  *mem)
 
 	
     setup_gdt();
-	
+
+	malloc(0x4000);
 
 	setup_interrupts();
 
 	dprintf("Hello world, 123456789\n");
+	
+	
+	// Let's cause an interrupt
+	__asm__("int 0x40");
 	
     
     while(1) {}
