@@ -27,6 +27,7 @@ void ioapic_set_irq(uint8_t irq, uint64_t apic_id, uint8_t vector) {
     uint32_t low_index = 0x10 + irq*2;
     uint32_t high_index = 0x10 + irq*2 + 1;
 
+
     uint32_t high = ioapic_read(high_index);
     // set APIC ID
     high &= ~0xff000000;

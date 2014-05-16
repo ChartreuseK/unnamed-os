@@ -39,7 +39,7 @@ void *malloc(int64_t size)
     ptr = (void *)(HEAP_BASE + curoffset);
     curoffset += size;
     
-    dprintf("ptr: %x, size: %x\n", ptr, size);
+
     return ptr;
 }
 
