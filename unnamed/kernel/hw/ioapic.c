@@ -5,7 +5,7 @@ uint64_t ioapic_base = NULL;
 
 void setioapicbase()
 {
-    ioapic_base = 0xFEC00000;
+    ioapic_base = 0x00000000FEC00000ULL;
 }
 
 

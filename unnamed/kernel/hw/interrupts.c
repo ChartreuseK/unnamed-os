@@ -1,8 +1,8 @@
 
 #include "hw/interrupts.h"
 
-#define APIC_REG_READ(index)        phymem_read32(0xFEE00000ULL + (0x10 * index))
-#define APIC_REG_WRITE(index, val)  phymem_write32(0xFEE00000ULL + (0x10 * index), val)
+#define APIC_REG_READ(index)        phymem_read32(0xFEE00000ULL + (0x10 * (index)))
+#define APIC_REG_WRITE(index, val)  phymem_write32(0xFEE00000ULL + (0x10 * (index)), val)
 
 #define APIC_ISR_BASE               0x10
 #define APIC_EOI                    0x0B
@@ -10,7 +10,7 @@
 
 #define KERNEL_SEGMENT              0x08
 
-#define BIT(num)                    (1U << num)
+#define BIT(num)                    (1U << (num))
 
 
 
@@ -53,8 +53,8 @@ void enable_local_apic()
     // Read the value of the Spurious Interrupt Vector register
     sivr = APIC_REG_READ(15);
     
-    // Clear bit 8 to enable the local APIC
-    sivr &= ~BIT(8);
+    // Set bit 8 to enable the local APIC
+    sivr |= BIT(8);
     
     // Write back to the register
     APIC_REG_WRITE(15, sivr);
@@ -430,7 +430,10 @@ void setup_interrupts()
     // Setup the keyboard IRQ1 to be handled by interrupt 0x40
     ioapic_set_irq(1, APIC_REG_READ(APIC_ID), 0x40);
     
-    //ioapic_set_irq(0, APIC_REG_READ(APIC_ID), 0x50);
+    // Install the PIT system timer (IRQ 2 with APIC!!!) to interrupt 0x50
+    ioapic_set_irq(2, APIC_REG_READ(APIC_ID), 0x50);
+    
+    
     
     dprintf("%x\n", APIC_REG_READ(0x2));
     
@@ -444,10 +447,22 @@ void setup_interrupts()
 }
 
 
-void generic_interrupt_exception(uint64_t intnum, uint64_t err_code)
+void generic_interrupt_exception(uint64_t intnum, uint64_t err_code, uint64_t savedregs)
 {
     dprintf("Exception 0x%x, code: 0x%x\n", intnum, err_code);
     conditional_acknowledge_interrupt(intnum);
+ 
+    /*dprintf("Stack trace\n");
+    dprintf("ss: 0x%x     rsp: 0x%x     \nrflags: 0x%x     cs: 0x%x\n", phymem_read64(savedregs),phymem_read64(savedregs+1*8),phymem_read64((savedregs+2*8)),phymem_read64((savedregs+3*8)));
+    dprintf("rip: 0x%x    ecode: 0x%x   \nret: 0x%x    \n", phymem_read64((savedregs+4*8)), phymem_read64((savedregs+5*8)),phymem_read64((savedregs+6*8))); 
+    dprintf("rax: 0x%x    rbx: 0x%x\nrcx: 0x%x    rdx: 0x%x\n",phymem_read64((savedregs+7*8)), phymem_read64((savedregs+8*8)), phymem_read64((savedregs+9*8)),phymem_read64((savedregs+10*8)));
+    dprintf("rsi: 0x%x    rdi: 0x%x\nrsp: 0x%x    rbp: 0x%x\n",phymem_read64((savedregs+11*8)), phymem_read64((savedregs+12*8)), phymem_read64((savedregs+13*8)),phymem_read64((savedregs+14*8)));
+    dprintf("r8: 0x%x     r9: 0x%x\nr10: 0x%x    r11: 0x%x\n",phymem_read64((savedregs+15*8)), phymem_read64((savedregs+16*8)), phymem_read64((savedregs+17*8)),phymem_read64((savedregs+18*8)));
+    dprintf("r12: 0x%x    r13: 0x%x\nr14: 0x%x    r15: 0x%x\n",phymem_read64((savedregs+19)), phymem_read64((savedregs+20)), phymem_read64((savedregs+21)),phymem_read64((savedregs+22)));
+    dprintf("ds: 0x%x     es: 0x%x\n", phymem_read16((savedregs + (23 * 8))), phymem_read16((savedregs + (23 * 8) + 2)));
+    dprintf("fs: 0x%x     gs: 0x%x\n", phymem_read64((savedregs + (23 * 8) + 4)), phymem_read64(savedregs + (23 * 8) + 12));
+ */
+ 
  
     text_putxy("!!! Exception encountered. Halting !!!", 0, 0, 0x1F);
  
@@ -455,14 +470,11 @@ void generic_interrupt_exception(uint64_t intnum, uint64_t err_code)
 }
 
 
-void generic_interrupt(uint64_t intnum)
+void generic_interrupt(uint64_t intnum, uint64_t savedregs)
 {
     uint8_t scancode;
-    // Called on every interrupt that is not listed as an exception
-    
-    
-
-    dprintf("interrupt 0x%x\n", intnum);
+    static uint32_t counter = 1;
+    // Called on every interrupt that is not listed as having an error code
     
     switch(intnum)
     {
@@ -475,7 +487,7 @@ void generic_interrupt(uint64_t intnum)
         dprintf("keyboard!");
         scancode = inportb(0x60);
         
-        if(scancode & 0x80)
+        if(!(scancode & 0x80))
         {
             dprintf("\nKey %x pressed\n", scancode & ~0x80);
         }
@@ -491,8 +503,12 @@ void generic_interrupt(uint64_t intnum)
         a &= 0x7f;
         outportb(0x61, a);
         break;
+    case 0x50:          // Timer
+        dprintf("%x\r", counter++);
+        break;
+    
     default:
-        dprintf("int %x\n", intnum);
+        dprintf("unhandled int %x\n", intnum);
         break;
     }
     

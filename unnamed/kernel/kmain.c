@@ -52,7 +52,7 @@ void kmain(uint64_t  *mem)
 	
 	// Let's cause an interrupt
 
-	__asm__("int 0x40");
+//	__asm__("int 0x40");
 	
 	int j = 0;
 	//int i = 1/j;

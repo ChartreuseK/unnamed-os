@@ -301,6 +301,10 @@ generic_int_handler:
     ;; We pushed 18 64bit registers onto our stack and 2 16 bit
     ;; So now our interrupt number is behind all those
     mov     rdi, [rsp + (18 * 8) + (2 * 2)]       ; Should load the interrupt number
+    
+    mov     rsi, rsp
+    add     rsi, (18 * 8) + (2 * 2) + (6 * 8)
+    
     call    generic_interrupt
 
     
@@ -402,7 +406,10 @@ generic_int_handler_exception:
     mov     rdi, [rsp + (18 * 8) + (2*2)]       ; Should load the interrupt number
     
     mov     rsi, [rsp + (19 * 8) + (2*2)]       ; Grab the error code
-                                        
+                       
+    mov     rdx, rsp
+    add     rdx, (18 * 8) + (2 * 2) + (7 * 8)
+    
     call    generic_interrupt_exception
 
     
@@ -442,7 +449,7 @@ generic_int_handler_exception:
 
     add     rsp, (2 * 8)        ; Pop off the interrupt number we pushed
                                 ; And the error code
-
+    
 
 
     iretq                       ; Return from the interrupt
