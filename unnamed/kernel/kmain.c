@@ -54,8 +54,15 @@ void kmain(uint64_t  *mem)
 
 	__asm__("int 0x40");
 	
-
+	int j = 0;
+	//int i = 1/j;
 	
+	
+	//page fault
+	char *test = (char *)0x0000000001300000;
+	//test[1] = 'a';
+    
+    //__asm__("int 14");
     
     while(1) {}
 }

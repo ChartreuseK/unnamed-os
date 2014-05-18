@@ -49,7 +49,7 @@ void bootmap()
 		}
 		
 		phymem_write64(temppage + (i * 8), 
-					0x40000000 * i | 1);
+					0x40000000ULL * i | 1);
 	}
 	
 	

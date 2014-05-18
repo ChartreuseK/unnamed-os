@@ -264,10 +264,11 @@ global int_handler_254
 global int_handler_255
 
 
-
+extern generic_interrupt_exception
 extern generic_interrupt
 global isr_table
 global generic_int_handler
+
 
 generic_int_handler:
     push    rax
@@ -297,11 +298,9 @@ generic_int_handler:
     push    fs
     push    gs
     
-    ;; We pushed 18 64bit registers onto our stack plus 2 16 bit registers
+    ;; We pushed 18 64bit registers onto our stack and 2 16 bit
     ;; So now our interrupt number is behind all those
-    
     mov     rdi, [rsp + (18 * 8) + (2 * 2)]       ; Should load the interrupt number
-                                        ; we pushed into rax
     call    generic_interrupt
 
     
@@ -340,6 +339,114 @@ generic_int_handler:
     iretq                       ; Return from the interrupt
     
     
+
+
+
+generic_int_handler_exception:
+    push    rax
+    push    rbx
+    push    rcx
+    push    rdx
+    push    rsi
+    push    rdi
+    push    rsp
+    push    rbp
+    
+    push    r8
+    push    r9
+    push    r10
+    push    r11
+    push    r12
+    push    r13
+    push    r14
+    push    r15
+    
+    mov     ax, ds
+    push    ax
+    
+    mov     ax, es
+    push    ax
+    
+    push    fs
+    push    gs
+    
+    ;; We pushed 18 64bit registers onto our stack and 2 16bit
+    ;; So now our interrupt number is behind all those
+
+    ;; rsp + 172   -> rip?          
+    ;; rsp + 164   -> error code?  <-- return pointer appears to be here
+    ;; rsp + 156   -> return pointer? <-- error code appears to be here
+    ;; rsp + 148   -> interrupt number
+    ;; rsp + 140   -> rax
+    ;; rsp + 132   -> rbx
+    ;; rsp + 124   -> rcx
+    ;; rsp + 116   -> rdx
+    ;; rsp + 108   -> rsi
+    ;; rsp + 100   -> rdi
+    ;; rsp + 92    -> rsp
+    ;; rsp + 84    -> rbp
+    ;; rsp + 76    -> r8
+    ;; rsp + 68    -> r9
+    ;; rsp + 60    -> r10
+    ;; rsp + 52    -> r11
+    ;; rsp + 44    -> r12
+    ;; rsp + 36    -> r13
+    ;; rsp + 28    -> r14
+    ;; rsp + 20    -> r15
+    ;; rsp + 18    -> ds
+    ;; rsp + 16    -> es
+    ;; rsp + 8     -> fs
+    ;; rsp         -> gs
+
+    
+    mov     rdi, [rsp + (18 * 8) + (2*2)]       ; Should load the interrupt number
+    
+    mov     rsi, [rsp + (19 * 8) + (2*2)]       ; Grab the error code
+                                        
+    call    generic_interrupt_exception
+
+    
+
+    ;; Do things here
+
+    pop     gs
+    pop     fs
+    
+    pop     ax
+    mov     es, ax
+    
+    pop     ax
+    mov     ds, ax
+
+    pop     r15
+    pop     r14
+    pop     r13
+    pop     r12
+    pop     r11
+    pop     r10
+    pop     r9
+    pop     r8
+
+    pop     rbp
+    pop     rsp
+    pop     rdi
+    pop     rsi
+    pop     rdx
+    pop     rcx
+    pop     rbx
+
+
+
+    pop     rax
+
+    add     rsp, (2 * 8)        ; Pop off the interrupt number we pushed
+                                ; And the error code
+
+
+
+    iretq                       ; Return from the interrupt
+
+
     
     
     
@@ -348,10 +455,10 @@ generic_int_handler:
 
 int_handler_0:
     push QWORD 0
-    jmp generic_int_handler
+    jmp generic_int_handler    ; Div by 0
 int_handler_1:
     push QWORD 1
-    jmp generic_int_handler
+    jmp generic_int_handler             ; 
 int_handler_2:
     push QWORD 2
     jmp generic_int_handler
@@ -384,13 +491,13 @@ int_handler_11:
     jmp generic_int_handler
 int_handler_12:
     push QWORD 12
-    jmp generic_int_handler
+    jmp generic_int_handler_exception       ; Stack fault
 int_handler_13:
     push QWORD 13
-    jmp generic_int_handler
+    jmp generic_int_handler_exception       ; GPF
 int_handler_14:
     push QWORD 14
-    jmp generic_int_handler
+    jmp generic_int_handler_exception       ; Page fault
 int_handler_15:
     push QWORD 15
     jmp generic_int_handler

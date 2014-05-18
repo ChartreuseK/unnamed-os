@@ -91,7 +91,7 @@ void setup_interrupts()
     uint64_t *test_isr = malloc(256*8);
     
     
-    // Quick test code, do not keep
+    // Quick test code, would prefer this work in the assembly
     test_isr[0] = (uint64_t)&int_handler_0;
     test_isr[1] = (uint64_t)&int_handler_1;
     test_isr[2] = (uint64_t)&int_handler_2;
@@ -430,6 +430,8 @@ void setup_interrupts()
     // Setup the keyboard IRQ1 to be handled by interrupt 0x40
     ioapic_set_irq(1, APIC_REG_READ(APIC_ID), 0x40);
     
+    ioapic_set_irq(0, APIC_REG_READ(APIC_ID), 0x50);
+    
     dprintf("%x\n", APIC_REG_READ(0x2));
     
     enable_interrupts();
@@ -442,19 +444,22 @@ void setup_interrupts()
 }
 
 
-
+void generic_interrupt_exception(uint64_t intnum, uint64_t err_code)
+{
+    dprintf("Exception 0x%x, code: 0x%x\n", intnum, err_code);
+    conditional_acknowledge_interrupt(intnum);
+    
+}
 
 
 void generic_interrupt(uint64_t intnum)
 {
-    static uint64_t count = 1;
-    static uint64_t seconds = 1;
     uint8_t scancode;
-    // Called on every interrupt that isn't explicitly defined
+    // Called on every interrupt that is not listed as an exception
     
     
 
-    
+    dprintf("interrupt 0x%x\n", intnum);
     
     switch(intnum)
     {
