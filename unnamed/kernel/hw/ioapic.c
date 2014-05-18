@@ -1,11 +1,13 @@
 #include "hw/ioapic.h"
 
 uint64_t ioapic_base = NULL;
-
+extern void dprintf(const char *msg, ...);
 
 void setioapicbase()
 {
-    ioapic_base = 0x00000000FEC00000ULL;
+    ioapic_base = find_first_ioapic_addr( find_apic_table( get_rsdt( find_rsdp() ) ) );
+    dprintf("!%x\n",ioapic_base);
+ //   ioapic_base = 0x00000000FEC00000ULL;
 }
 
 

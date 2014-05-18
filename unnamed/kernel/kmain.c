@@ -23,8 +23,6 @@ void text_putxy(char *str, int x, int y, uint8_t attr);
 extern void dprintf(const char *msg, ...);
 extern void dinit();
 
-extern uint64_t *isr_table;
-
 
 void kmain(uint64_t  *mem) 
 {

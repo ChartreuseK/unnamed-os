@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 #include "mem/physical.h"
-
+#include "hw/acpitables.h"
 void ioapic_write(uint32_t index, uint32_t value);
 uint32_t ioapic_read(uint32_t index);
 void setioapicbase();
