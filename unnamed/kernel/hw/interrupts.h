@@ -16,7 +16,7 @@ void setup_interrupts();
 
 
 
-
+extern void text_putxy(char *str, int x, int y, uint8_t attr);
 
 
 extern uint64_t *isr_table;

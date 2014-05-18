@@ -1,8 +1,8 @@
 
 #include "hw/interrupts.h"
 
-#define APIC_REG_READ(index)        phymem_read32(0xFEE00000 + (0x10 * index))
-#define APIC_REG_WRITE(index, val)  phymem_write32(0xFEE00000 + (0x10 * index), val)
+#define APIC_REG_READ(index)        phymem_read32(0xFEE00000ULL + (0x10 * index))
+#define APIC_REG_WRITE(index, val)  phymem_write32(0xFEE00000ULL + (0x10 * index), val)
 
 #define APIC_ISR_BASE               0x10
 #define APIC_EOI                    0x0B
@@ -430,7 +430,7 @@ void setup_interrupts()
     // Setup the keyboard IRQ1 to be handled by interrupt 0x40
     ioapic_set_irq(1, APIC_REG_READ(APIC_ID), 0x40);
     
-    ioapic_set_irq(0, APIC_REG_READ(APIC_ID), 0x50);
+    //ioapic_set_irq(0, APIC_REG_READ(APIC_ID), 0x50);
     
     dprintf("%x\n", APIC_REG_READ(0x2));
     
@@ -448,7 +448,10 @@ void generic_interrupt_exception(uint64_t intnum, uint64_t err_code)
 {
     dprintf("Exception 0x%x, code: 0x%x\n", intnum, err_code);
     conditional_acknowledge_interrupt(intnum);
-    
+ 
+    text_putxy("!!! Exception encountered. Halting !!!", 0, 0, 0x1F);
+ 
+    __asm__("hlt");
 }
 
 
@@ -463,6 +466,10 @@ void generic_interrupt(uint64_t intnum)
     
     switch(intnum)
     {
+    case 0x0:
+        dprintf("Divide by zero, halting!\n");
+        __asm__("hlt");
+        break;
     case 0x40:          // Keyboard
     
         dprintf("keyboard!");

@@ -62,6 +62,8 @@ void kmain(uint64_t  *mem)
 	char *test = (char *)0x0000000001300000;
 	//test[1] = 'a';
     
+    
+    __asm__("hlt");
     //__asm__("int 14");
     
     while(1) {}

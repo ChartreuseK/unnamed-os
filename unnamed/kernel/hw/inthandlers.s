@@ -434,9 +434,10 @@ generic_int_handler_exception:
     pop     rdx
     pop     rcx
     pop     rbx
-
-
-
+    
+    
+    
+    
     pop     rax
 
     add     rsp, (2 * 8)        ; Pop off the interrupt number we pushed
@@ -479,16 +480,16 @@ int_handler_7:
     jmp generic_int_handler
 int_handler_8:
     push QWORD 8
-    jmp generic_int_handler
+    jmp generic_int_handler_exception       ; Double fault
 int_handler_9:
     push QWORD 9
     jmp generic_int_handler
 int_handler_10:
     push QWORD 10
-    jmp generic_int_handler
+    jmp generic_int_handler_exception       ; Invalid TSS
 int_handler_11:
     push QWORD 11
-    jmp generic_int_handler
+    jmp generic_int_handler_exception       ; Segment not present
 int_handler_12:
     push QWORD 12
     jmp generic_int_handler_exception       ; Stack fault
@@ -506,7 +507,7 @@ int_handler_16:
     jmp generic_int_handler
 int_handler_17:
     push QWORD 17
-    jmp generic_int_handler
+    jmp generic_int_handler_exception       ; Alignment check
 int_handler_18:
     push QWORD 18
     jmp generic_int_handler
