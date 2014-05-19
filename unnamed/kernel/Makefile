@@ -4,7 +4,7 @@ NASM=nasm
 CFLAGS=-W -Wall -Wextra -nostdlib -nodefaultlibs -mcmodel=large -m64 \
 	-ffreestanding -mno-red-zone -masm=intel -std=c99 \
 	-Werror -Wno-error=unused-variable -Wno-error=unused-function \
-	-Wno-error=unused-parameter \
+	-Wno-error=unused-parameter -fno-zero-initialized-in-bss\
 	-I`pwd`
 LDFLAGS=-nostdlib -nodefaultlibs -m elf_x86_64
 
@@ -13,7 +13,7 @@ KERNEL_OUTPUT=kernel.bin
 LDSCRIPT=kernel.ld
 
 
-MODULES = mem hw .
+MODULES = mem hw io .
 
 
 KERNEL_SOURCES=$(foreach module, $(MODULES), $(wildcard $(module)/*.c)) $(wildcard *.s) $(wildcard hw/*.s)

@@ -6,270 +6,14 @@
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-global int_handler_0
-global int_handler_1
-global int_handler_2
-global int_handler_3
-global int_handler_4
-global int_handler_5
-global int_handler_6
-global int_handler_7
-global int_handler_8
-global int_handler_9
-global int_handler_10
-global int_handler_11
-global int_handler_12
-global int_handler_13
-global int_handler_14
-global int_handler_15
-global int_handler_16
-global int_handler_17
-global int_handler_18
-global int_handler_19
-global int_handler_20
-global int_handler_21
-global int_handler_22
-global int_handler_23
-global int_handler_24
-global int_handler_25
-global int_handler_26
-global int_handler_27
-global int_handler_28
-global int_handler_29
-global int_handler_30
-global int_handler_31
-global int_handler_32
-global int_handler_33
-global int_handler_34
-global int_handler_35
-global int_handler_36
-global int_handler_37
-global int_handler_38
-global int_handler_39
-global int_handler_40
-global int_handler_41
-global int_handler_42
-global int_handler_43
-global int_handler_44
-global int_handler_45
-global int_handler_46
-global int_handler_47
-global int_handler_48
-global int_handler_49
-global int_handler_50
-global int_handler_51
-global int_handler_52
-global int_handler_53
-global int_handler_54
-global int_handler_55
-global int_handler_56
-global int_handler_57
-global int_handler_58
-global int_handler_59
-global int_handler_60
-global int_handler_61
-global int_handler_62
-global int_handler_63
-global int_handler_64
-global int_handler_65
-global int_handler_66
-global int_handler_67
-global int_handler_68
-global int_handler_69
-global int_handler_70
-global int_handler_71
-global int_handler_72
-global int_handler_73
-global int_handler_74
-global int_handler_75
-global int_handler_76
-global int_handler_77
-global int_handler_78
-global int_handler_79
-global int_handler_80
-global int_handler_81
-global int_handler_82
-global int_handler_83
-global int_handler_84
-global int_handler_85
-global int_handler_86
-global int_handler_87
-global int_handler_88
-global int_handler_89
-global int_handler_90
-global int_handler_91
-global int_handler_92
-global int_handler_93
-global int_handler_94
-global int_handler_95
-global int_handler_96
-global int_handler_97
-global int_handler_98
-global int_handler_99
-global int_handler_100
-global int_handler_101
-global int_handler_102
-global int_handler_103
-global int_handler_104
-global int_handler_105
-global int_handler_106
-global int_handler_107
-global int_handler_108
-global int_handler_109
-global int_handler_110
-global int_handler_111
-global int_handler_112
-global int_handler_113
-global int_handler_114
-global int_handler_115
-global int_handler_116
-global int_handler_117
-global int_handler_118
-global int_handler_119
-global int_handler_120
-global int_handler_121
-global int_handler_122
-global int_handler_123
-global int_handler_124
-global int_handler_125
-global int_handler_126
-global int_handler_127
-global int_handler_128
-global int_handler_129
-global int_handler_130
-global int_handler_131
-global int_handler_132
-global int_handler_133
-global int_handler_134
-global int_handler_135
-global int_handler_136
-global int_handler_137
-global int_handler_138
-global int_handler_139
-global int_handler_140
-global int_handler_141
-global int_handler_142
-global int_handler_143
-global int_handler_144
-global int_handler_145
-global int_handler_146
-global int_handler_147
-global int_handler_148
-global int_handler_149
-global int_handler_150
-global int_handler_151
-global int_handler_152
-global int_handler_153
-global int_handler_154
-global int_handler_155
-global int_handler_156
-global int_handler_157
-global int_handler_158
-global int_handler_159
-global int_handler_160
-global int_handler_161
-global int_handler_162
-global int_handler_163
-global int_handler_164
-global int_handler_165
-global int_handler_166
-global int_handler_167
-global int_handler_168
-global int_handler_169
-global int_handler_170
-global int_handler_171
-global int_handler_172
-global int_handler_173
-global int_handler_174
-global int_handler_175
-global int_handler_176
-global int_handler_177
-global int_handler_178
-global int_handler_179
-global int_handler_180
-global int_handler_181
-global int_handler_182
-global int_handler_183
-global int_handler_184
-global int_handler_185
-global int_handler_186
-global int_handler_187
-global int_handler_188
-global int_handler_189
-global int_handler_190
-global int_handler_191
-global int_handler_192
-global int_handler_193
-global int_handler_194
-global int_handler_195
-global int_handler_196
-global int_handler_197
-global int_handler_198
-global int_handler_199
-global int_handler_200
-global int_handler_201
-global int_handler_202
-global int_handler_203
-global int_handler_204
-global int_handler_205
-global int_handler_206
-global int_handler_207
-global int_handler_208
-global int_handler_209
-global int_handler_210
-global int_handler_211
-global int_handler_212
-global int_handler_213
-global int_handler_214
-global int_handler_215
-global int_handler_216
-global int_handler_217
-global int_handler_218
-global int_handler_219
-global int_handler_220
-global int_handler_221
-global int_handler_222
-global int_handler_223
-global int_handler_224
-global int_handler_225
-global int_handler_226
-global int_handler_227
-global int_handler_228
-global int_handler_229
-global int_handler_230
-global int_handler_231
-global int_handler_232
-global int_handler_233
-global int_handler_234
-global int_handler_235
-global int_handler_236
-global int_handler_237
-global int_handler_238
-global int_handler_239
-global int_handler_240
-global int_handler_241
-global int_handler_242
-global int_handler_243
-global int_handler_244
-global int_handler_245
-global int_handler_246
-global int_handler_247
-global int_handler_248
-global int_handler_249
-global int_handler_250
-global int_handler_251
-global int_handler_252
-global int_handler_253
-global int_handler_254
-global int_handler_255
-
-
 extern generic_interrupt_exception
 extern generic_interrupt
 global isr_table
 global generic_int_handler
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; For interrupts and exceptions which do not push error codes
+;;;;;;;;;
 generic_int_handler:
     push    rax
     push    rbx
@@ -343,9 +87,11 @@ generic_int_handler:
     iretq                       ; Return from the interrupt
     
     
+    
 
-
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; For when an exception passes along an error message
+;;;
 generic_int_handler_exception:
     push    rax
     push    rbx
@@ -466,7 +212,7 @@ int_handler_0:
     jmp generic_int_handler    ; Div by 0
 int_handler_1:
     push QWORD 1
-    jmp generic_int_handler             ; 
+    jmp generic_int_handler    ; 
 int_handler_2:
     push QWORD 2
     jmp generic_int_handler

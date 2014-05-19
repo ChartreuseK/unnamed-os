@@ -13,7 +13,7 @@
 #define BIT(num)                    (1U << (num))
 
 
-
+void dprintf(const char *msg, ...);
 
 
 /* disable_pic()
@@ -190,9 +190,9 @@ void setup_interrupts()
     
 }
 
-void stack_trace(uint64_t savedregs)
+void register_trace(uint64_t savedregs)
 {
-    dprintf("Stack trace\n");
+    dprintf("Register Trace\n");
     dprintf("ss:     0x%x    rsp:   0x%x\nrflags: 0x%x    cs:    0x%x\n", *(uint64_t*)(savedregs),*(uint64_t*)(savedregs-1*8),*(uint64_t*)((savedregs-2*8)),*(uint64_t*)((savedregs-3*8)));
     dprintf("rip:    0x%x    ecode: 0x%x\nret:    0x%x    \n", *(uint64_t*)((savedregs-4*8)), *(uint64_t*)((savedregs-6*8)),*(uint64_t*)((savedregs-5*8))); 
     dprintf("rax:    0x%x    rbx:   0x%x\nrcx:    0x%x    rdx:   0x%x\n",*(uint64_t*)((savedregs-7*8)), *(uint64_t*)((savedregs-8*8)), *(uint64_t*)((savedregs-9*8)),*(uint64_t*)((savedregs-10*8)));
@@ -201,14 +201,27 @@ void stack_trace(uint64_t savedregs)
     dprintf("r12:    0x%x    r13:   0x%x\nr14:    0x%x    r15:   0x%x\n",*(uint64_t*)((savedregs-19)), *(uint64_t*)((savedregs-20)), *(uint64_t*)((savedregs-21)),*(uint64_t*)((savedregs-22)));
     dprintf("ds:     0x%x    es:    0x%x\n", *(uint16_t*)((savedregs - (23 * 8))), *(uint16_t*)((savedregs - (23 * 8) - 2)));
     dprintf("fs:     0x%x    gs:    0x%x\n", *(uint64_t*)((savedregs - (23 * 8) - 4)), *(uint64_t*)(savedregs - (23 * 8) - 12));
+    
+    
+    
 }
+
+
+
+
+
+
+
+
+
+
 
 void generic_interrupt_exception(uint64_t intnum, uint64_t err_code, uint64_t savedregs)
 {
     dprintf("Exception 0x%x, code: 0x%x\n", intnum, err_code);
     conditional_acknowledge_interrupt(intnum);
  
-    stack_trace(savedregs);
+    register_trace(savedregs);
  
  
     text_putxy("!!! Exception encountered. Halting !!!", 0, 0, 0x1F);
@@ -225,13 +238,16 @@ void generic_interrupt(uint64_t intnum, uint64_t savedregs)
     
     switch(intnum)
     {
-    case 0x0:
+    case 0x0:       // Division by 0 exception - no error code
         dprintf("Divide by zero, halting!\n");
-        stack_trace(savedregs);
+        register_trace(savedregs);
         __asm__("hlt");
         break;
+        
+        
     case 0x40:          // Keyboard
-    
+        key_event();
+        break;
         dprintf("keyboard!");
         scancode = inportb(0x60);
         
@@ -243,21 +259,21 @@ void generic_interrupt(uint64_t intnum, uint64_t savedregs)
         {
             dprintf("\nKey %x depressed\n", scancode);
         }
-    
+    /*
         // Reset the keyboard controller
-        uint8_t a = inportb(0x61);
+        uint8_t a = inportb(0x64);
         a |= 0x82;
-        outportb(0x61, a);
+        outportb(0x64, a);
         a &= 0x7f;
-        outportb(0x61, a);
+        outportb(0x64m, a);*/
         break;
     case 0x50:          // Timer
-        dprintf("%x\r", counter++);
+        //dprintf("%x\r", counter++);
         break;
     
     default:
         dprintf("unhandled int %x\n", intnum);
-        stack_trace(savedregs);
+        register_trace(savedregs);
         break;
     }
     

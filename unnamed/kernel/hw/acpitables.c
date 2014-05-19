@@ -5,6 +5,9 @@
 
 extern void dprintf(const char *msg, ...);
 
+
+
+
 uint64_t find_rsdp()
 {
     register uint64_t i;
@@ -89,7 +92,7 @@ uint64_t find_first_ioapic_addr(uint64_t apic_table)
                 return ioapic;
             }
         }
-        // Don't bother with local APICs just yet (needed for SMP)
+        // Don't bother with local APICs just yet (will be needed for SMP)
         
         
         i += phymem_read8(apic_table + 44 + i + 1);

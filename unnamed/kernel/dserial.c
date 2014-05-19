@@ -59,8 +59,8 @@ void dprintf(const char *msg, ...) {
                     dputchar("0123456789abcdef"[vv]);
                 }
             }
-            else if(*p == 'd') {
-				
+            else if(*p == 'c') {
+				dputchar((char)va_arg(va, int));
 				
 			}
 

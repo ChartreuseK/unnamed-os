@@ -22,7 +22,7 @@ void text_putxy(char *str, int x, int y, uint8_t attr);
 
 extern void dprintf(const char *msg, ...);
 extern void dinit();
-
+extern uint8_t keycode_to_ascii[];
 
 void kmain(uint64_t  *mem) 
 {
@@ -42,7 +42,7 @@ void kmain(uint64_t  *mem)
     setup_gdt();
 
 	malloc(0x4000);
-
+    init_ps2_keyboard();
 	setup_interrupts();
 
 	dprintf("Hello world, 123456789\n");
@@ -64,7 +64,11 @@ void kmain(uint64_t  *mem)
     __asm__("hlt");
     //__asm__("int 14");
     
-    while(1) {}
+    while(1) 
+    {
+		dprintf("%c", keycode_to_ascii[key_buff_get_blk()]);
+		
+	}
 }
 
 void text_putxy(char *str, int x, int y, uint8_t attr)
