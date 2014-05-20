@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include "mem/physical.h"
+#include "io/serialconsole.h"
 
 enum 
 {
@@ -26,8 +27,6 @@ void bootmap();
 int addmap(uint64_t physical, uint64_t virtual, unsigned int flags);
 void removemap(uint64_t virtual);
 uint64_t getmap(uint64_t virtual);
-
-extern void dprintf(const char *msg, ...);
 
 
 

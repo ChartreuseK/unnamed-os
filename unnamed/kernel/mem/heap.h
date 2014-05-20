@@ -1,4 +1,4 @@
-
+#include "io/serialconsole.h"
 #include "mem/virtual.h"
 #include "mem/physical.h"
 

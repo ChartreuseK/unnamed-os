@@ -13,8 +13,6 @@
 #define BIT(num)                    (1U << (num))
 
 
-void dprintf(const char *msg, ...);
-
 
 /* disable_pic()
  *  Disables the legacy Master-Slave 8259 PIC
@@ -190,15 +188,24 @@ void setup_interrupts()
 void register_trace(uint64_t savedregs)
 {
     dprintf("Register Trace\n");
-    dprintf("ss:     0x%x    rsp:   0x%x\nrflags: 0x%x    cs:    0x%x\n", *(uint64_t*)(savedregs),*(uint64_t*)(savedregs-1*8),*(uint64_t*)((savedregs-2*8)),*(uint64_t*)((savedregs-3*8)));
-    dprintf("rip:    0x%x    ecode: 0x%x\nret:    0x%x    \n", *(uint64_t*)((savedregs-4*8)), *(uint64_t*)((savedregs-6*8)),*(uint64_t*)((savedregs-5*8))); 
-    dprintf("rax:    0x%x    rbx:   0x%x\nrcx:    0x%x    rdx:   0x%x\n",*(uint64_t*)((savedregs-7*8)), *(uint64_t*)((savedregs-8*8)), *(uint64_t*)((savedregs-9*8)),*(uint64_t*)((savedregs-10*8)));
-    dprintf("rsi:    0x%x    rdi:   0x%x\nrsp:    0x%x    rbp:   0x%x\n",*(uint64_t*)((savedregs-11*8)), *(uint64_t*)((savedregs-12*8)), *(uint64_t*)((savedregs-13*8)),*(uint64_t*)((savedregs-14*8)));
-    dprintf("r8:     0x%x    r9:    0x%x\nr10:    0x%x    r11:   0x%x\n",*(uint64_t*)((savedregs-15*8)), *(uint64_t*)((savedregs-16*8)), *(uint64_t*)((savedregs-17*8)),*(uint64_t*)((savedregs-18*8)));
-    dprintf("r12:    0x%x    r13:   0x%x\nr14:    0x%x    r15:   0x%x\n",*(uint64_t*)((savedregs-19)), *(uint64_t*)((savedregs-20)), *(uint64_t*)((savedregs-21)),*(uint64_t*)((savedregs-22)));
-    dprintf("ds:     0x%x    es:    0x%x\n", *(uint16_t*)((savedregs - (23 * 8))), *(uint16_t*)((savedregs - (23 * 8) - 2)));
-    dprintf("fs:     0x%x    gs:    0x%x\n", *(uint64_t*)((savedregs - (23 * 8) - 4)), *(uint64_t*)(savedregs - (23 * 8) - 12));
+    dprintf("ss:     0x%p    rsp:   0x%p\nrflags: 0x%p    cs:    0x%p\n", *(uint64_t*)(savedregs),*(uint64_t*)(savedregs-1*8),*(uint64_t*)((savedregs-2*8)),*(uint64_t*)((savedregs-3*8)));
+    dprintf("rip:    0x%p    ecode: 0x%p\nret:    0x%p    \n", *(uint64_t*)((savedregs-4*8)), *(uint64_t*)((savedregs-6*8)),*(uint64_t*)((savedregs-5*8))); 
+    dprintf("rax:    0x%p    rbx:   0x%p\nrcx:    0x%p    rdx:   0x%p\n",*(uint64_t*)((savedregs-7*8)), *(uint64_t*)((savedregs-8*8)), *(uint64_t*)((savedregs-9*8)),*(uint64_t*)((savedregs-10*8)));
+    dprintf("rsi:    0x%p    rdi:   0x%p\nrsp:    0x%p    rbp:   0x%p\n",*(uint64_t*)((savedregs-11*8)), *(uint64_t*)((savedregs-12*8)), *(uint64_t*)((savedregs-13*8)),*(uint64_t*)((savedregs-14*8)));
+    dprintf("r8:     0x%p    r9:    0x%p\nr10:    0x%p    r11:   0x%p\n",*(uint64_t*)((savedregs-15*8)), *(uint64_t*)((savedregs-16*8)), *(uint64_t*)((savedregs-17*8)),*(uint64_t*)((savedregs-18*8)));
+    dprintf("r12:    0x%p    r13:   0x%p\nr14:    0x%p    r15:   0x%p\n",*(uint64_t*)((savedregs-19)), *(uint64_t*)((savedregs-20)), *(uint64_t*)((savedregs-21)),*(uint64_t*)((savedregs-22)));
+    dprintf("ds:     0x%p    es:    0x%p\n", *(uint16_t*)((savedregs - (23 * 8))), *(uint16_t*)((savedregs - (23 * 8) - 2)));
+    dprintf("fs:     0x%p    gs:    0x%p\n", *(uint64_t*)((savedregs - (23 * 8) - 4)), *(uint64_t*)(savedregs - (23 * 8) - 12));
     
+    printf("Register Trace\n");
+    printf("ss:     0x%p    rsp:   0x%p\nrflags: 0x%p    cs:    0x%p\n", *(uint64_t*)(savedregs),*(uint64_t*)(savedregs-1*8),*(uint64_t*)((savedregs-2*8)),*(uint64_t*)((savedregs-3*8)));
+    printf("rip:    0x%p    ecode: 0x%p\nret:    0x%p    \n", *(uint64_t*)((savedregs-4*8)), *(uint64_t*)((savedregs-6*8)),*(uint64_t*)((savedregs-5*8))); 
+    printf("rax:    0x%p    rbx:   0x%p\nrcx:    0x%p    rdx:   0x%p\n",*(uint64_t*)((savedregs-7*8)), *(uint64_t*)((savedregs-8*8)), *(uint64_t*)((savedregs-9*8)),*(uint64_t*)((savedregs-10*8)));
+    printf("rsi:    0x%p    rdi:   0x%p\nrsp:    0x%p    rbp:   0x%p\n",*(uint64_t*)((savedregs-11*8)), *(uint64_t*)((savedregs-12*8)), *(uint64_t*)((savedregs-13*8)),*(uint64_t*)((savedregs-14*8)));
+    printf("r8:     0x%p    r9:    0x%p\nr10:    0x%p    r11:   0x%p\n",*(uint64_t*)((savedregs-15*8)), *(uint64_t*)((savedregs-16*8)), *(uint64_t*)((savedregs-17*8)),*(uint64_t*)((savedregs-18*8)));
+    printf("r12:    0x%p    r13:   0x%p\nr14:    0x%p    r15:   0x%p\n",*(uint64_t*)((savedregs-19)), *(uint64_t*)((savedregs-20)), *(uint64_t*)((savedregs-21)),*(uint64_t*)((savedregs-22)));
+    printf("ds:     0x%p    es:    0x%p\n", *(uint16_t*)((savedregs - (23 * 8))), *(uint16_t*)((savedregs - (23 * 8) - 2)));
+    printf("fs:     0x%p    gs:    0x%p\n", *(uint64_t*)((savedregs - (23 * 8) - 4)), *(uint64_t*)(savedregs - (23 * 8) - 12));
     
     
 }
@@ -215,14 +222,24 @@ void register_trace(uint64_t savedregs)
 
 void generic_interrupt_exception(uint64_t intnum, uint64_t err_code, uint64_t savedregs)
 {
-    dprintf("Exception 0x%x, code: 0x%x\n", intnum, err_code);
     conditional_acknowledge_interrupt(intnum);
  
+    
+ 
+ 
+    printf("\n\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+    printf("!!!!!!! Exception encountered. Halting !!!!!!!\n");
+    printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+    printf("Exception 0x%x, code: 0x%x\n", intnum, err_code);
+    
+    dprintf("\n\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+    dprintf("!!!!!!! Exception encountered. Halting !!!!!!!\n");
+    dprintf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+    dprintf("Exception 0x%x, code: 0x%x\n", intnum, err_code);
+    
+    
     register_trace(savedregs);
- 
- 
-    text_putxy("!!! Exception encountered. Halting !!!", 0, 0, 0x1F);
- 
+    
     __asm__("hlt");
 }
 

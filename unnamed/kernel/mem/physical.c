@@ -1,4 +1,4 @@
-#include "physical.h"
+#include "mem/physical.h"
 
 // Don't allow the use of ram below 2MB to be treated as free 
 // And don't over ride the temp page table from 200000 to 210000
@@ -10,9 +10,6 @@
 void set_next_page(uint64_t page, uint64_t next);
 uint64_t get_next_page(uint64_t page);
 
-
-extern void dprintf(const char *msg, ...);
-extern void dinit();
 
 
 /* Sidenote remember not to allow the first page so that NULL doesn't become valid */

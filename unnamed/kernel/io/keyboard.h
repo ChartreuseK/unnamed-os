@@ -1,7 +1,7 @@
 
 #include <stdint.h>
 #include "hw/ports.h"
-
+#include "io/serialconsole.h"
 
 uint8_t init_ps2_keyboard();
 void key_event();

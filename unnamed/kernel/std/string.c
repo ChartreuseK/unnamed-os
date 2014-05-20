@@ -65,9 +65,47 @@ char *itoa(int64_t num, char *str, int base)
       
         
     if(isnegative)
-        str[++i] = '-';
+        str[i++] = '-';
         
-    str[i + 1] = '\0';
+    str[i] = '\0';
+    
+    // Now reverse the string
+    reverse(str, i);   
+    return str;
+}
+
+
+
+
+
+
+
+char *uitoa(uint64_t num, char *str, int base)
+{
+    int i = 0;
+    
+    // If the num is 0 then str = "0"
+    if(num == 0)
+    {
+        str[0] = '0';
+        str[1] = '\0';
+        return str;
+    }
+
+    // Now we'll do the conversion, this will give us a reverse order string
+    for(; num; i++)
+    {
+        unsigned int digit = ( num % base );
+        
+        if( digit >= 10 )
+            str[i] = 'A' + (digit - 10);
+        else
+            str[i] = '0' + (digit);
+            
+        num /= base;
+    }
+      
+    str[i] = '\0';
     
     // Now reverse the string
     reverse(str, i);   

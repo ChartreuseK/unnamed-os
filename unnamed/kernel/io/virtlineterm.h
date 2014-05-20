@@ -5,6 +5,7 @@
 #include "mem/physical.h"
 #include "std/string.h"
 #include "hw/ports.h"
+#include "io/serialconsole.h"
 
 void initscreen();
 void putstr(const char *str);

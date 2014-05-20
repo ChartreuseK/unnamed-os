@@ -3,7 +3,7 @@
 
 
 #include <stdint.h>
-
+#include "io/serialconsole.h"
 
 #define PHY_MAP_BASE     0xFFFFC00000000000ULL
 

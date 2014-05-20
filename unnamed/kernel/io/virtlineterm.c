@@ -144,6 +144,9 @@ void printf(const char *msg, ...)
     char str[32];
     char *s;
     int num;
+    uint32_t unum;
+    uint64_t unum64;
+    int64_t num64;
     
     const char *fmt = msg;
     
@@ -158,7 +161,51 @@ void printf(const char *msg, ...)
             case '%':
                 putchar_nodraw('%');
                 break;
+            case 'p':       // Pointer (shortcut for %llx)
+                unum64 = (uint64_t)va_arg(va, uint64_t);
+                uitoa(unum64, str, 16);
+                s = str;
+                for(int i = strlen(str); i <= 16; i++)
+                {
+                    putchar_nodraw('0');
+                }
+                while(*s)
+                {
+                    putchar_nodraw(*s++);
+                }
+                break;
+            case 'b':       // Not standard but binary is nice
+                unum = (uint32_t)va_arg(va, uint32_t);
+            
+                uitoa(unum, str, 2);
+                s = str;
+                while(*s)
+                {
+                    putchar_nodraw(*s++);
+                }
+                break;
+            case 'o':
+                unum = (uint32_t)va_arg(va, uint32_t);
+            
+                uitoa(unum, str, 8);
+                s = str;
+                while(*s)
+                {
+                    putchar_nodraw(*s++);
+                }
+                break;
                 
+            case 'u':
+                unum = (uint32_t)va_arg(va, uint32_t);
+                
+                uitoa(unum, str, 10);
+                s = str;
+                while(*s)
+                {
+                    putchar_nodraw(*s++);
+                }
+                break;   
+            case 'i':
             case 'd':
                 num = (int)va_arg(va, int);
                 
@@ -189,6 +236,67 @@ void printf(const char *msg, ...)
             case 'c':
                 // With variable arguments chars are stored as ints
                 putchar_nodraw( (char)va_arg(va, int) ); 
+                break;
+             
+            case 'l':   // 64bit number expected
+                if(*(fmt+2) == 'l')
+                {
+                    switch(*(fmt+3))
+                    {
+                    case 'b': // Not standard but binary is nice
+                        unum64 = (uint64_t)va_arg(va, uint64_t);
+                    
+                        uitoa(unum64, str, 2);
+                        s = str;
+                        while(*s)
+                        {
+                            putchar_nodraw(*s++);
+                        }
+                        break;
+                    case 'o':
+                        unum64 = (uint64_t)va_arg(va, uint64_t);
+                    
+                        uitoa(unum64, str, 8);
+                        s = str;
+                        while(*s)
+                        {
+                            putchar_nodraw(*s++);
+                        }
+                        break;
+                    case 'i':
+                    case 'd':
+                        num64 = (int64_t)va_arg(va, int64_t);
+                    
+                        itoa(num64, str, 10);
+                        s = str;
+                        while(*s)
+                        {
+                            putchar_nodraw(*s++);
+                        }
+                        break;
+                    case 'u':
+                        unum64 = (uint64_t)va_arg(va, uint64_t);
+                    
+                        uitoa(unum64, str, 10);
+                        s = str;
+                        while(*s)
+                        {
+                            putchar_nodraw(*s++);
+                        }
+                        break;
+                    case 'x':
+                        unum64 = (uint64_t)va_arg(va, uint64_t);
+                        uitoa(unum64, str, 16);
+                        s = str;
+                        while(*s)
+                        {
+                            putchar_nodraw(*s++);
+                        }
+                        break;
+                        
+                    }
+                }
+                fmt+=2;
                 break;
                 
             }

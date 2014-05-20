@@ -6,7 +6,7 @@
 #include "mem/gdt.h"
 #include "io/virtlineterm.h"
 #include "hw/interrupts.h"
-
+#include "io/serialconsole.h"
 #include "std/string.h"
 
 #define PHY_MAP_BASE     0xFFFFC00000000000ULL
@@ -21,9 +21,6 @@
 void text_clrscr();
 void text_putxy(char *str, int x, int y, uint8_t attr);
 
-
-extern void dprintf(const char *msg, ...);
-extern void dinit();
 extern uint8_t keycode_to_ascii[];
 
 void kmain(uint64_t  *mem) 
@@ -32,7 +29,7 @@ void kmain(uint64_t  *mem)
 
 
     // Init the serial console
-    dinit();
+    init_serial_console(115200);
 
     // Clear the screen
     //text_clrscr();
@@ -48,39 +45,31 @@ void kmain(uint64_t  *mem)
     init_ps2_keyboard();
 	setup_interrupts();
 
-	dprintf("Hello world, 123456789\n");
-	
-	
-	// Let's cause an interrupt
+	dprintf("Hello world!\n");
 
-//	__asm__("int 0x40");
-	
-	int j = 0;
-	//int i = 1/j;
-	
-	
-	//page fault
-	char *test = (char *)0x0000000001300000;
-	//test[1] = 'a';
-    
-    
-    __asm__("hlt");
-    //__asm__("int 14");
-    
     initscreen();
+    printf("Virtual Line Terminal:\n");
     
-    for(int d = 0; d < 10000; d++)
+    
+    /*
+    printf("Beginning memory test\n");
+    for(int d = 0; d < 64; d++)
     {
-		void *test2 = malloc(0x1000); // 4k
-		dprintf("%x\n", (uint64_t)test2);
+		void *test2 = malloc(4096); // 4096bytes
+		printf("%p    ", (uint64_t)test2);
+		
+		*(char*)test2 = 'a';
 		free(test2);
 	}
+	printf("\nDone memory test\n");
+	*/
+
+
 	char temp;
 
     while(1) 
     {
 		printf("%c", keycode_to_ascii[key_buff_get_blk()]);
-		
 	}
 }
 

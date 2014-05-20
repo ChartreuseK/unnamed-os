@@ -29,7 +29,7 @@
 
 uint8_t keystatus[256]; 
 
-void dprintf(const char *msg, ...);
+
 /* Keycodes will be defined based on the row and column of the key
  * on a standard 101-key US QWERTY keyboard. With the top left corner
  * being Row 0 Column 0.

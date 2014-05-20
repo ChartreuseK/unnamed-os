@@ -34,7 +34,6 @@ uint64_t pool_128M_top    = 0;
 uint64_t pool_512M_top    = 0;
 uint64_t pool_1G_top      = 0;
 
-extern void dprintf(const char *str, ...);
 
 void *malloc(int64_t size)
 {
@@ -51,7 +50,7 @@ void *malloc(int64_t size)
             for(int i = (4096/64)-1; i > 0; i--)
             {
                 *(uint64_t*)(POOL_64B + pool_64b_top + (i * 64)) = pool_64b_firstfree;
-                pool_64b_firstfree = POOL_64B + pool_64b_top + (i * 4096);
+                pool_64b_firstfree = POOL_64B + pool_64b_top + (i * 64);
             }
             retval = (void*)(POOL_64B + pool_64b_top);
             pool_64b_top += 4096;
@@ -76,7 +75,7 @@ void *malloc(int64_t size)
             for(int i = (4096/512)-1; i > 0; i--)
             {
                 *(uint64_t*)(POOL_512B + pool_512b_top + (i * 512)) = pool_512b_firstfree;
-                pool_512b_firstfree = POOL_512B + pool_512b_top + (i * 4096);
+                pool_512b_firstfree = POOL_512B + pool_512b_top + (i * 512);
             }
             
             retval = (void*)(POOL_512B + pool_512b_top);
