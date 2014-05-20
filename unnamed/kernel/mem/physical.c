@@ -23,7 +23,7 @@ uint64_t last_free_page = NULL;
  * kernel is loaded and the end of where it is loaded.
  */
 extern char kernel_pbase;
-extern char _data_end; 
+extern char _data_phy_end; 
 
 
 /* phymem_align_regions
@@ -63,11 +63,11 @@ void phymem_mark_all_free(uint64_t *regions)
 {
     uint64_t i;
     //DEBUG: dprintf("Starting to mark free\n");
-    //DEBUG: dprintf("Kernel: %x, %x\n", (uint64_t)&kernel_pbase, (uint64_t)&_data_end);
+    //dprintf("Kernel: %x, %x\n", (uint64_t)&kernel_pbase, (uint64_t)&_data_end);
     
     for(; *regions != NULL || *(regions + 1) != NULL; regions = regions + 2)
     {
-        //DEBUG: dprintf("Region base: %x     Region size: %x\n", *regions, *(regions+1));
+        //dprintf("Region base: %x     Region size: %x\n", *regions, *(regions+1));
         // Go through the region in steps of 4KB
         for(i = 0; i < *(regions + 1); i += 0x1000) 
         {
@@ -75,7 +75,7 @@ void phymem_mark_all_free(uint64_t *regions)
             if(( *regions + i )  <=  PROTECTED_RAM) continue;
             // If we're looking at memory in use by the kernel (where we are loaded)
             if(( *regions + i )  >=  (uint64_t)&kernel_pbase &&
-               ( *regions + i )  <=  (uint64_t)&_data_end) continue;
+               ( *regions + i )  <=  (uint64_t)&_data_phy_end) continue;
              
             // If not then we can mark the page as free and add it to the linked list
             phymem_mark_free( *regions + i );
@@ -104,7 +104,7 @@ uint64_t phymem_get_page()
     
     next_free_page = get_next_page(next_free_page);
     
-    
+    //dprintf("-%x\n",page);
     return page;
 }
 

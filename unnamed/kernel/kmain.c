@@ -43,7 +43,8 @@ void kmain(uint64_t  *mem)
 	
     setup_gdt();
 
-	malloc(0x4000);
+	free(malloc(0x4010));
+	
     init_ps2_keyboard();
 	setup_interrupts();
 
@@ -68,8 +69,14 @@ void kmain(uint64_t  *mem)
     
     initscreen();
     
+    for(int d = 0; d < 10000; d++)
+    {
+		void *test2 = malloc(0x1000); // 4k
+		dprintf("%x\n", (uint64_t)test2);
+		free(test2);
+	}
 	char temp;
-    putchar(' ');
+
     while(1) 
     {
 		printf("%c", keycode_to_ascii[key_buff_get_blk()]);
