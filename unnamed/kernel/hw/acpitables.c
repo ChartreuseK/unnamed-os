@@ -31,7 +31,7 @@ uint64_t find_rsdp()
                 dprintf("RSDP failed checksum! Looking for another\n");
                 continue;
             }
-            dprintf("Found RSDP! %x\n", i);
+            //dprintf("Found RSDP! %x\n", i);
             // So we're now sure enough that this is the RSDP
             // Now we can return it's address
             return i;
@@ -48,7 +48,7 @@ uint64_t find_rsdp()
 
 uint64_t get_rsdt(uint64_t rsdp)
 {
-    dprintf("rsdt: %x\n", phymem_read32(rsdp + 16));
+    //dprintf("rsdt: %x\n", phymem_read32(rsdp + 16));
     return phymem_read32(rsdp + 16);
 }
 
@@ -62,7 +62,7 @@ uint64_t find_apic_table(uint64_t rsdt)
         if(phymem_read32(apic_table) == 0x43495041) // "APIC" 
         {   
             // This is the APIC table
-            dprintf("Found apic table: %x\n", apic_table);
+            //dprintf("Found apic table: %x\n", apic_table);
             return apic_table;
         }
         
@@ -88,7 +88,7 @@ uint64_t find_first_ioapic_addr(uint64_t apic_table)
             if(phymem_read32(apic_table + 44 + i + 8) == 0) // Looking for the I/O APIC with a base IRQ of 0
             {
                 ioapic = phymem_read32(apic_table + 44 + i + 4);
-                dprintf("Found first ioapic: %x\n", ioapic);
+                //dprintf("Found first ioapic: %x\n", ioapic);
                 return ioapic;
             }
         }

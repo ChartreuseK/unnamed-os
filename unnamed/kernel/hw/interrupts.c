@@ -178,9 +178,6 @@ void setup_interrupts()
     ioapic_set_irq(2, APIC_REG_READ(APIC_ID), 0x50);
     
     
-    
-    dprintf("%x\n", APIC_REG_READ(0x2));
-    
     enable_interrupts();
     
     

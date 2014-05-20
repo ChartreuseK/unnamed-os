@@ -4,8 +4,10 @@
 #include "mem/virtual.h"
 #include "mem/heap.h"
 #include "mem/gdt.h"
-
+#include "io/virtlineterm.h"
 #include "hw/interrupts.h"
+
+#include "std/string.h"
 
 #define PHY_MAP_BASE     0xFFFFC00000000000ULL
 #define REFK_PHY_MAP_BASE (uint8_t *)0xFFFFC00000000000ULL
@@ -33,7 +35,7 @@ void kmain(uint64_t  *mem)
     dinit();
 
     // Clear the screen
-    text_clrscr();
+    //text_clrscr();
     
     phymem_align_regions(mem);
     phymem_mark_all_free(mem);
@@ -64,9 +66,13 @@ void kmain(uint64_t  *mem)
     __asm__("hlt");
     //__asm__("int 14");
     
+    initscreen();
+    
+	char temp;
+    putchar(' ');
     while(1) 
     {
-		dprintf("%c", keycode_to_ascii[key_buff_get_blk()]);
+		printf("%c", keycode_to_ascii[key_buff_get_blk()]);
 		
 	}
 }

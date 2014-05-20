@@ -54,11 +54,11 @@ uint8_t keycode_to_ascii[] = // Gives 0 if unprintable
     {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,         // 0x0F
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,         // 0x1F
-    '`','1','2','3','4','5','6','7','8','9','0','-','=',0,0,0, // 0x2F
+    '`','1','2','3','4','5','6','7','8','9','0','-','=','\b',0,0, // 0x2F
     0,0,'/','*','-',0,0,0,0,0,0,0,0,0,0,0,                  // 0X3F
     0,'q','w','e','r','t','y','u','i','o','p','[',']','\\',0,0, // 0x4F
     0,'7','8','9','+',0,0,0,0,0,0,0,0,0,0,0,                // 0x5F
-    0,'a','s','d','f','g','h','j','k','l',';','\'',0,'4','5','6', // 0x6F
+    0,'a','s','d','f','g','h','j','k','l',';','\'','\n','4','5','6', // 0x6F
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                        // 0x7F
     0,'z','x','c','v','b','n','m',',','.','/',0,0,'1','2','3', //0x8F
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                        // 0x9F
@@ -140,7 +140,7 @@ void key_event()
 {
     uint8_t scancode = inportb(PS2_DATA_PORT);
 
-
+    // Ignore depresses for our simple buffer
     if(scancode & 0x80) return;
 
     if(prev_count != 0)
@@ -216,7 +216,7 @@ uint8_t send_keyboard_cmd(uint8_t command)
     // Though also add a timeout so we don't wait forever
     for(i = 0; i < TIMEOUT_KEYBOARD_SEND; i++)
     {
-        if(inportb(PS2_STATUS_PORT) & BIT(1))
+        if(!(inportb(PS2_STATUS_PORT) & BIT(1)))
         {
             break;
         }
@@ -287,13 +287,13 @@ uint8_t init_ps2_keyboard()
     outportb(PS2_CMD_PORT, PS2_CMD_WRITE_CFG);
     
     // Finally send a reset command to the keyboard
-    send_keyboard_cmd(KBD_CMD_RESET);
+    /*send_keyboard_cmd(KBD_CMD_RESET);
     
     if(inportb(PS2_DATA_PORT) != KBD_RESET_PASSED)
     {
         dprintf("Keyboard self-test failed!\n");
         return 0;
-    }
+    }*/
     
     return 1;
 }

@@ -5,14 +5,12 @@
 
 
 
-int64_t curoffset = -1;
+int64_t curoffset = 0;
 int64_t curpage = -1;
 
 
 void *malloc(int64_t size)
 {
-    
-    if(curoffset == -1) curoffset = 0;
     
     void *ptr = NULL;
     
@@ -90,3 +88,11 @@ void free(void __attribute__((unused)) *ptr)
 {
     // 
 }
+
+
+
+
+
+
+
+
