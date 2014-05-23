@@ -13,7 +13,7 @@ KERNEL_OUTPUT=kernel.bin
 LDSCRIPT=kernel.ld
 
 
-MODULES = mem hw io std .
+MODULES = mem hw io std threads .
 
 
 KERNEL_SOURCES=$(foreach module, $(MODULES), $(wildcard $(module)/*.c)) $(wildcard *.s) $(wildcard hw/*.s)

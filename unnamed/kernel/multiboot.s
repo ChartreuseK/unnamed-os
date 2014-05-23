@@ -34,13 +34,13 @@ multiboot_header:
 	; Entry point.
 	dd	bootstrap
 	; Video type. (0, linear graphics)
-	dd 0
+	dd 1
 	; Video width.
-	dd 1024
+	dd 80
 	; Video height
-	dd 768
+	dd 50
 	; Video depth
-	dd 24
+	dd 0
 
 section .text
 global bootstrap

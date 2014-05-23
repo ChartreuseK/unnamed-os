@@ -47,7 +47,36 @@ generic_int_handler:
     mov     rdi, [rsp + (18 * 8) + (2 * 2)]       ; Should load the interrupt number
     
     mov     rsi, rsp
-    add     rsi, (18 * 8) + (2 * 2) + (6 * 8)
+    add     rsi, (18 * 8) + (2 * 2) + (6 * 8)     ; Pass a pointer to the start of all the saved registers
+                                                  ; This includes all the ones passed to the interrupt
+    ;; rsp + 196   -> ss                <-- rsi (savedregs) points here
+    ;; rsp + 188   -> rsp
+    ;; rsp + 180   -> rflags
+    ;; rsp + 172   -> cs
+    ;; rsp + 164   -> rip          
+    ;; rsp + 156   -> return pointer    
+    ;; rsp + 148   -> interrupt number
+    ;; rsp + 140   -> rax
+    ;; rsp + 132   -> rbx
+    ;; rsp + 124   -> rcx
+    ;; rsp + 116   -> rdx
+    ;; rsp + 108   -> rsi
+    ;; rsp + 100   -> rdi
+    ;; rsp + 92    -> rsp
+    ;; rsp + 84    -> rbp
+    ;; rsp + 76    -> r8
+    ;; rsp + 68    -> r9
+    ;; rsp + 60    -> r10
+    ;; rsp + 52    -> r11
+    ;; rsp + 44    -> r12
+    ;; rsp + 36    -> r13
+    ;; rsp + 28    -> r14
+    ;; rsp + 20    -> r15
+    ;; rsp + 18    -> ds                <-- 16 bit!
+    ;; rsp + 16    -> es                <-- 16 bit!
+    ;; rsp + 8     -> fs
+    ;; rsp         -> gs
+
     
     call    generic_interrupt
 
@@ -123,9 +152,14 @@ generic_int_handler_exception:
     ;; We pushed 18 64bit registers onto our stack and 2 16bit
     ;; So now our interrupt number is behind all those
 
-    ;; rsp + 172   -> rip?          
-    ;; rsp + 164   -> error code?  <-- return pointer appears to be here
-    ;; rsp + 156   -> return pointer? <-- error code appears to be here
+
+    ;; rsp + 204   -> ss
+    ;; rsp + 196   -> rsp
+    ;; rsp + 188   -> rflags
+    ;; rsp + 180   -> cs
+    ;; rsp + 172   -> rip          
+    ;; rsp + 164   -> return pointer    <-- return pointer appears to be here
+    ;; rsp + 156   -> error code        <-- error code appears to be here
     ;; rsp + 148   -> interrupt number
     ;; rsp + 140   -> rax
     ;; rsp + 132   -> rbx

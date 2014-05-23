@@ -8,6 +8,7 @@
 #include "hw/interrupts.h"
 #include "io/serialconsole.h"
 #include "std/string.h"
+#include "threads/scheduler.h"
 
 #define PHY_MAP_BASE     0xFFFFC00000000000ULL
 #define REFK_PHY_MAP_BASE (uint8_t *)0xFFFFC00000000000ULL
@@ -22,6 +23,14 @@ void text_clrscr();
 void text_putxy(char *str, int x, int y, uint8_t attr);
 
 extern uint8_t keycode_to_ascii[];
+
+void testthread()
+{
+	while(1)
+	{
+		dprintf("I'm a thread!\n");
+	}
+}
 
 void kmain(uint64_t  *mem) 
 {
@@ -43,12 +52,16 @@ void kmain(uint64_t  *mem)
 	free(malloc(0x4010));
 	
     init_ps2_keyboard();
+    //init_threads();
+    
 	setup_interrupts();
 
 	dprintf("Hello world!\n");
 
     initscreen();
     printf("Virtual Line Terminal:\n");
+    
+    
     
     
     /*
@@ -64,14 +77,32 @@ void kmain(uint64_t  *mem)
 	printf("\nDone memory test\n");
 	*/
 
-
 	char temp;
+
+	char input[512];
+
+	//new_kthread(&testthread, 512);
 
     while(1) 
     {
-		printf("%c", keycode_to_ascii[key_buff_get_blk()]);
+		printf("> ");
+		ngets(input, 512);
+		
+		for(char *token = strtok(input, " -"); token != NULL; token = strtok(NULL, " -"))
+		{
+			printf("Token: %s\n", token);
+		}
+		
+		
+		//printf("User entered: %s\n", input);
+		
+		
+		
 	}
 }
+
+
+
 
 void text_putxy(char *str, int x, int y, uint8_t attr)
 {

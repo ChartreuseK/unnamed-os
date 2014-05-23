@@ -44,11 +44,17 @@ uint8_t keystatus[256];
  * 
  * |20|21|22|23|24|25|26|27|28|29|2a|2b|2c|   2d   |  |2e|2f|30|   |31|32|33|34|
  * |40 |41|42|43|44|45|46|47|48|49|4a|4b|4c|  4d   |  |4e|4f|50|   |51|52|53|54|
- * | 60 |61|62|63|64|65|66|67|68|69|6a|6b|    6c   |               |6d|6e|6f|  |
+ * | 60 |61|62|63|64|65|66|67|68|69|6a|6b|    6c   |               |6d|6e|6f|__|
  * |  80 |81|82|83|84|85|86|87|88|89|8a|    8b     |     |8c|      |8d|8e|8f|90|
- * | a0 |   | a1 |      a2         | a3 |     | a4 |  |a5|a6|a7|   | a8  |a9|  |
+ * | a0 |   | a1 |      a2         | a3 |     | a4 |  |a5|a6|a7|   | a8  |a9|__|
  * 
  *****/
+ 
+// Bit 0 - Shift, Bit 1 - Alt, Bit 2 - Ctrl, Bit 3 - Caps lock, Bit 4 - Scroll lock
+// Bit 5 - Num lock
+uint8_t modifiers = 0;
+
+
 
 uint8_t keycode_to_ascii[] = // Gives 0 if unprintable
     {
@@ -64,7 +70,21 @@ uint8_t keycode_to_ascii[] = // Gives 0 if unprintable
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                        // 0x9F
     0,0,' ',0,0,0,0,0,'0','.',0,0,0,0,0,0                   // 0xAF
 };
-            
+        
+uint8_t upperkeycode_to_ascii[] = // Gives 0 if unprintable
+    {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,         // 0x0F
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,         // 0x1F
+    '~','!','@','#','$','%','^','&','*','(',')','_','+','\b',0,0, // 0x2F
+    0,0,'/','*','-',0,0,0,0,0,0,0,0,0,0,0,                  // 0X3F
+    0,'Q','W','E','R','T','Y','U','I','O','P','{','}','|',0,0, // 0x4F
+    0,'7','8','9','+',0,0,0,0,0,0,0,0,0,0,0,                // 0x5F
+    0,'A','S','D','F','G','H','J','K','L',':','\"','\n','4','5','6', // 0x6F
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                        // 0x7F
+    0,'Z','X','C','V','B','N','M','<','>','?',0,0,'1','2','3', //0x8F
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                        // 0x9F
+    0,0,' ',0,0,0,0,0,'0','.',0,0,0,0,0,0                   // 0xAF
+};
 
 
 
@@ -114,19 +134,46 @@ uint8_t prev_count = 0;
 
 
 #define KEY_BUFF_SIZE       256
-volatile uint8_t key_buff[KEY_BUFF_SIZE];
+
+volatile uint16_t key_buff[KEY_BUFF_SIZE];
 volatile int key_buff_count = 0;
 
 void key_buff_add(uint8_t keycode)
 {
-    if(key_buff_count < (KEY_BUFF_SIZE - 1))
+    switch(keycode)
     {
-        key_buff[key_buff_count++] = keycode;
+    case 0x60: // Capslock
+        modifiers ^= BIT(3);
+        break;    
+    case 0x80: // Shift
+    case 0x8b:
+        // Toggle shift untill we implement key release
+        modifiers |=  BIT(0);
+        break;
+    case 0xa0: // Ctrl
+    case 0xa4:
+        modifiers |=  BIT(2);
+        break;    
+    case 0xa1: // Alt
+    case 0xa3:
+        modifiers |=  BIT(1);
+        break;    
+    case 0x0e: // Scroll lock
+        modifiers ^= BIT(4);
+        break;    
+    case 0x31: // Num lock
+        modifiers ^= BIT(5);
+        break;
+
+    default:
+        if(key_buff_count < (KEY_BUFF_SIZE - 1))
+        {
+            key_buff[key_buff_count++] = (modifiers << 8) + keycode;
+        }
     }
-    
 }
 
-uint8_t key_buff_get_blk()
+uint16_t key_buff_get_blk()
 {
     // Wait till we get something in our buffer
     while(key_buff_count == 0);
@@ -136,12 +183,74 @@ uint8_t key_buff_get_blk()
     
 }
 
+uint16_t getchar() // Lower byte is the ascii char, upper byte is modifier
+{
+    uint16_t keycode = key_buff_get_blk();
+    
+    if( keycode & BIT(8) ) // Shift bit
+    {
+        return upperkeycode_to_ascii[(uint8_t)keycode];
+        
+    }
+    else
+    {
+        return keycode_to_ascii[(uint8_t)keycode];
+    }
+    
+}
+uint16_t getchare() // Lower byte is the ascii char, upper byte is modifier
+{
+    uint16_t keycode = key_buff_get_blk();
+    if( keycode & BIT(8) ) // Shift bit
+    {
+        putchar(upperkeycode_to_ascii[(uint8_t)keycode]);
+        return upperkeycode_to_ascii[(uint8_t)keycode];
+        
+    }
+    else
+    {
+        putchar(keycode_to_ascii[(uint8_t)keycode]);
+        return keycode_to_ascii[(uint8_t)keycode];
+    }
+    
+}
+
+void ngets(char *str, int len)
+{
+    for(int i = 0; i < len;)
+    {
+        str[i] = getchar();
+        
+        if(str[i] == '\n')
+        {
+            putchar('\n');
+            str[i] = '\0';
+            break;
+        }
+        else if(str[i] == '\b')
+        {
+            if(i > 0) 
+            {
+                putchar('\b');
+                i--;
+            }
+        }
+        else
+        {
+            putchar(str[i]);
+            i++;
+        }
+        
+    }
+    str[len] = '\0';
+}
+
 void key_event()
 {
     uint8_t scancode = inportb(PS2_DATA_PORT);
 
     // Ignore depresses for our simple buffer
-    if(scancode & 0x80) return;
+
 
     if(prev_count != 0)
     {
@@ -154,7 +263,20 @@ void key_event()
                 // Then this is the second part of a two byte scan code
                 //dprintf("2 part keycode: %x\n", double_scan_to_key[scancode]);
                 
-                key_buff_add(double_scan_to_key[scancode]);
+                switch(scancode)
+                {
+                case 0x9D: // Right ctrl released
+                    modifiers &= ~BIT(2);
+                    break;
+                case 0xB8: // Right alt released
+                    modifiers &= ~BIT(1);
+                    break;
+                default:
+                    if (!(scancode & 0x80))
+                    {
+                        key_buff_add(double_scan_to_key[scancode]);
+                    }
+                }
             }
             else
             {
@@ -198,9 +320,26 @@ void key_event()
         else
         {
             // Single byte scancode
-            
+            switch(scancode)
+            {
+            case 0x9D: // Left ctrl released
+                modifiers &= ~BIT(2);
+                break;
+            case 0xB8: // Left alt
+                modifiers &= ~BIT(1);
+                break;
+            case 0xB6: // Right shift released
+            case 0xAA: // Left
+                modifiers &= ~BIT(0);
+                break;
+            default:
+                if (!(scancode & 0x80))
+                {
+                    key_buff_add(single_scan_to_key[scancode]);
+                }
+            }
             //dprintf("1 part keycode: %x\n", single_scan_to_key[scancode]);
-            key_buff_add(single_scan_to_key[scancode]);
+            
         }
         
     }

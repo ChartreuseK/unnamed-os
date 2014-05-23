@@ -210,7 +210,29 @@ void register_trace(uint64_t savedregs)
     
 }
 
-
+void register_trace_noerror(uint64_t savedregs)
+{
+    dprintf("Register Trace\n");
+    dprintf("ss:     0x%p    rsp:   0x%p\nrflags: 0x%p    cs:    0x%p\n", *(uint64_t*)(savedregs),*(uint64_t*)(savedregs-1*8),*(uint64_t*)((savedregs-2*8)),*(uint64_t*)((savedregs-3*8)));
+    dprintf("rip:    0x%p               \nret:    0x%p    \n", *(uint64_t*)((savedregs-4*8)),*(uint64_t*)((savedregs-5*8))); 
+    dprintf("rax:    0x%p    rbx:   0x%p\nrcx:    0x%p    rdx:   0x%p\n",*(uint64_t*)((savedregs-6*8)), *(uint64_t*)((savedregs-7*8)), *(uint64_t*)((savedregs-8*8)),*(uint64_t*)((savedregs-9*8)));
+    dprintf("rsi:    0x%p    rdi:   0x%p\nrsp:    0x%p    rbp:   0x%p\n",*(uint64_t*)((savedregs-10*8)), *(uint64_t*)((savedregs-11*8)), *(uint64_t*)((savedregs-12*8)),*(uint64_t*)((savedregs-13*8)));
+    dprintf("r8:     0x%p    r9:    0x%p\nr10:    0x%p    r11:   0x%p\n",*(uint64_t*)((savedregs-14*8)), *(uint64_t*)((savedregs-15*8)), *(uint64_t*)((savedregs-16*8)),*(uint64_t*)((savedregs-17*8)));
+    dprintf("r12:    0x%p    r13:   0x%p\nr14:    0x%p    r15:   0x%p\n",*(uint64_t*)((savedregs-18*8)), *(uint64_t*)((savedregs-19*8)), *(uint64_t*)((savedregs-20*8)),*(uint64_t*)((savedregs-21*8)));
+    dprintf("ds:     0x%p    es:    0x%p\n", *(uint16_t*)((savedregs - (22 * 8))), *(uint16_t*)((savedregs - (22 * 8) - 2)));
+    dprintf("fs:     0x%p    gs:    0x%p\n", *(uint64_t*)((savedregs - (22 * 8) - 4)), *(uint64_t*)(savedregs - (22 * 8) - 12));
+    
+    printf("Register Trace\n");
+    printf("ss:     0x%p    rsp:   0x%p\nrflags: 0x%p    cs:    0x%p\n", *(uint64_t*)(savedregs),*(uint64_t*)(savedregs-1*8),*(uint64_t*)((savedregs-2*8)),*(uint64_t*)((savedregs-3*8)));
+    printf("rip:    0x%p               \nret:    0x%p    \n", *(uint64_t*)((savedregs-4*8)),*(uint64_t*)((savedregs-5*8))); 
+    printf("rax:    0x%p    rbx:   0x%p\nrcx:    0x%p    rdx:   0x%p\n",*(uint64_t*)((savedregs-6*8)), *(uint64_t*)((savedregs-7*8)), *(uint64_t*)((savedregs-8*8)),*(uint64_t*)((savedregs-9*8)));
+    printf("rsi:    0x%p    rdi:   0x%p\nrsp:    0x%p    rbp:   0x%p\n",*(uint64_t*)((savedregs-10*8)), *(uint64_t*)((savedregs-11*8)), *(uint64_t*)((savedregs-12*8)),*(uint64_t*)((savedregs-13*8)));
+    printf("r8:     0x%p    r9:    0x%p\nr10:    0x%p    r11:   0x%p\n",*(uint64_t*)((savedregs-14*8)), *(uint64_t*)((savedregs-15*8)), *(uint64_t*)((savedregs-16*8)),*(uint64_t*)((savedregs-17*8)));
+    printf("r12:    0x%p    r13:   0x%p\nr14:    0x%p    r15:   0x%p\n",*(uint64_t*)((savedregs-18*8)), *(uint64_t*)((savedregs-19*8)), *(uint64_t*)((savedregs-20*8)),*(uint64_t*)((savedregs-21*8)));
+    printf("ds:     0x%p    es:    0x%p\n", *(uint16_t*)((savedregs - (22 * 8))), *(uint16_t*)((savedregs - (22 * 8) - 2)));
+    printf("fs:     0x%p    gs:    0x%p\n", *(uint64_t*)((savedregs - (22 * 8) - 4)), *(uint64_t*)(savedregs - (22 * 8) - 12));
+    
+}
 
 
 
@@ -241,6 +263,7 @@ void generic_interrupt_exception(uint64_t intnum, uint64_t err_code, uint64_t sa
     register_trace(savedregs);
     
     __asm__("hlt");
+    while(1){}
 }
 
 
@@ -254,8 +277,9 @@ void generic_interrupt(uint64_t intnum, uint64_t savedregs)
     {
     case 0x0:       // Division by 0 exception - no error code
         dprintf("Divide by zero, halting!\n");
-        register_trace(savedregs);
+        register_trace_noerror(savedregs);
         __asm__("hlt");
+        while(1){}
         break;
         
         
@@ -283,6 +307,7 @@ void generic_interrupt(uint64_t intnum, uint64_t savedregs)
         break;
     case 0x50:          // Timer
         //dprintf("%x\r", counter++);
+        //scheduler_event(savedregs);
         break;
     
     default:

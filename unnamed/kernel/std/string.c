@@ -1,5 +1,81 @@
 #include "std/string.h"
 
+#include "io/serialconsole.h"
+
+#define NULL 0
+
+char *strtok(char *str, const char *delim)
+{
+    static char *last = NULL;
+    
+    char *working = NULL;
+    char *token = NULL;
+    const char *curdelim = NULL;
+    
+    // Not sure what standard behavior for this is
+    if(delim == NULL)
+    {
+        if(str == NULL) return last;
+        else            return str;
+    }
+        
+    // Get our working string
+    if(str == NULL) working = last;
+    else            working = str;
+    
+    if(!working) return NULL;
+    
+    dprintf("str: '%s', delim: '%s'\n", str, delim);
+    
+    // Now we need to strip of any leading delimiters
+    for(;;working++)
+    {
+        
+        for(curdelim = delim; *working != *curdelim; curdelim++)
+        {
+            if(!*curdelim) // If we've run out of delimiters
+            {
+                // We've found our first non delimter character, now to get out of here
+                
+                // A perfectly valid use of a goto! No way! :)
+                goto strtok_firstchar; 
+            }
+        }
+        
+        if(!*working)
+        {
+            // The string contained nothing but delimiters
+            return NULL;
+        }
+    }
+strtok_firstchar:
+    
+    
+    // working now points to the first non delimiter character of the string
+    token = working;
+    
+    do
+    {
+        for(curdelim = delim; (*working != *curdelim) && *curdelim; curdelim++)
+        {
+            
+        }
+        if(*working == *curdelim && *curdelim)
+        {
+            // We hit another delimiter
+            last = working + 1;
+            *working = '\0';
+            return token;
+        }
+        
+    } while(*working++);
+    
+    // If we got here we went through the remaining string without hitting a delimiter
+    last = NULL;
+    return token;
+    
+}
+
 char *reverse(char *str, int length)
 {
     char temp;
