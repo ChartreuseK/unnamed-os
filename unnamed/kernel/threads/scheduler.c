@@ -1,6 +1,6 @@
 
 #include "threads/scheduler.h"
-
+#include "io/virtlineterm.h"
 
 
  
@@ -40,7 +40,7 @@ struct RegisterContext {
     uint64_t rflags;
     uint64_t cs;
     uint64_t rip;
-    uint64_t retptr;
+    
     
     uint64_t interruptnumber; // Only used for continuity
     
@@ -50,7 +50,7 @@ struct RegisterContext {
     uint64_t rdx;
     uint64_t rsi;
     uint64_t rdi;
-    uint64_t rsp2;
+    
     uint64_t rbp;
     uint64_t r8;
     uint64_t r9;
@@ -64,8 +64,8 @@ struct RegisterContext {
     uint16_t ds;
     uint16_t es;
     
-    uint64_t fs;
-    uint64_t gs;
+    uint16_t fs;
+    uint16_t gs;
 };
 
 
@@ -120,6 +120,8 @@ void init_threads()
     {
         threads_queue[i] = (struct Thread *)NULL;
     }
+    
+    current_thread = NULL;
 }
 
 int is_thread_queue_full()
@@ -171,6 +173,7 @@ void scheduler_event(uint64_t savedregs)
     
     if(current_thread != NULL)
     {
+        
         // We need to store the savedregs into this current process's store
         savedregs_to_context(current_thread->regs, savedregs);
 
@@ -186,43 +189,79 @@ void scheduler_event(uint64_t savedregs)
         }
         else
         {
+            dprintf("Scheduler: Some thread died\n");
             // Cleanup the thread
             free(current_thread->stackbottom);
             free(current_thread->regs);
             free(current_thread);
+            current_thread = NULL;
         }
+     
     }
     
-    
+    int count = 0; 
     // Pull the next thread from the queue
     while((temp = dequeue_thread()) != NULL) // != NULL is for clarity only
     {
+        
         // TODO: other thread statuses, check sleaping threads, and waiting threads
         if( temp->status == waiting )
         {
-            
+            enqueue_thread(temp);
         }
         if( temp->status == sleeping )
         {
-            
+            enqueue_thread(temp);
         }
         if( temp->status == active ) break; // Break off on the first active thread
+        
+        if(count++ > MAX_THREADS)
+        {
+            // There doesn't appear to be any active threads
+            __asm__("hlt");
+        }
     }
     
     
-    if( temp != NULL ) // We have no active threads queued
+    if( temp != NULL ) // We have an active threads queued
     {
         current_thread = temp;
-        register_trace_noerror(savedregs);
+        
         // Place it's stored regisiters into saved regs
         context_to_savedregs(current_thread->regs, savedregs);
         // And that's it for now
-        register_trace_noerror(savedregs);
-        //__asm__("cli");
-        //__asm__("hlt");
     }
+    
 }
 
+void sleep_thread_self()
+{
+    current_thread->status = sleeping;
+}
+
+// Set the return pointer of a thread to this!
+void delete_thread_self( )
+{
+    
+    current_thread->status = dead;
+    
+    
+    
+    // Now how do we properly go to the next thread
+    // And is it really fair to swap without a clock since the next
+    // thread will only get the remaining time...
+    
+    // Maybe we should mark the thread as dead so it's not readded
+    // to the queue on the next context switch
+}
+void kthread_wrapper( void (*function)(void) )
+{
+    function();
+    delete_thread_self();
+    
+    __asm__("hlt"); // Wait out the rest of our timeslice
+    while(1);
+}
 
 uint32_t new_kthread( void (*function)(void), uint64_t stack_size )
 {
@@ -237,21 +276,20 @@ uint32_t new_kthread( void (*function)(void), uint64_t stack_size )
     newthread->regs->rsp = (uint64_t)( (uint64_t)newthread->stackbottom + stack_size );
     
     
-    newthread->regs->rip = (uint64_t)function;
-    newthread->regs->retptr = (uint64_t)function;
+    newthread->regs->rip = (uint64_t)&kthread_wrapper;
     
     // Not sure what these values should be!!
-    newthread->regs->cs = 0;
-    newthread->regs->ds = 0;
-    newthread->regs->es = 0;
-    newthread->regs->fs = 0;
-    newthread->regs->gs = 0;
-    newthread->regs->ss = 0;
+    newthread->regs->cs = 0x8;
+    newthread->regs->ds = 0x10;
+    newthread->regs->es = 0x10;
+    newthread->regs->fs = 0x10;
+    newthread->regs->gs = 0x10;
+    newthread->regs->ss = 0x10;
     
-    newthread->regs->rflags = 0;
+    newthread->regs->rflags = 0x202;
     
     newthread->regs->rbp = 0;
-    newthread->regs->rdi = 0;
+    newthread->regs->rdi = (uint64_t)function;
     newthread->regs->rsi = 0;
     
     newthread->regs->rax = 0;
@@ -284,21 +322,7 @@ uint32_t new_kthread( void (*function)(void), uint64_t stack_size )
 
 
 
-// Set the return pointer of a thread to this!
-void delete_thread_self( )
-{
-    
-    current_thread->status = dead;
-    
-    
-    
-    // Now how do we properly go to the next thread
-    // And is it really fair to swap without a clock since the next
-    // thread will only get the remaining time...
-    
-    // Maybe we should mark the thread as dead so it's not readded
-    // to the queue on the next context switch
-}
+
 /*
  * Copies the registers from savedregs into a context
  * 
@@ -313,33 +337,33 @@ void savedregs_to_context(struct RegisterContext *context, uint64_t savedregs)
     context->rflags = *(uint64_t *)(savedregs - ( 2 * 8 ));
     context->cs     = *(uint64_t *)(savedregs - ( 3 * 8 ));
     context->rip    = *(uint64_t *)(savedregs - ( 4 * 8 ));
-    context->retptr = *(uint64_t *)(savedregs - ( 5 * 8 ));
     
-    context->interruptnumber = *(uint64_t *)(savedregs - (  6 * 8 ));
     
-    context->rax = *(uint64_t *)(savedregs - (  7 * 8 ));
-    context->rbx = *(uint64_t *)(savedregs - (  8 * 8 ));
-    context->rcx = *(uint64_t *)(savedregs - (  9 * 8 ));
-    context->rdx = *(uint64_t *)(savedregs - ( 10 * 8 ));
-    context->rsi = *(uint64_t *)(savedregs - ( 11 * 8 ));
-    context->rdi = *(uint64_t *)(savedregs - ( 12 * 8 ));
-    context->rsp2 = *(uint64_t *)(savedregs - ( 13 * 8 ));
-    context->rbp = *(uint64_t *)(savedregs - ( 14 * 8 ));
+    context->interruptnumber = *(uint64_t *)(savedregs - (  5 * 8 ));
     
-    context->r8  = *(uint64_t *)(savedregs - ( 15 * 8 ));
-    context->r9  = *(uint64_t *)(savedregs - ( 16 * 8 ));
-    context->r10 = *(uint64_t *)(savedregs - ( 17 * 8 ));
-    context->r11 = *(uint64_t *)(savedregs - ( 18 * 8 ));
-    context->r12 = *(uint64_t *)(savedregs - ( 19 * 8 ));
-    context->r13 = *(uint64_t *)(savedregs - ( 20 * 8 ));
-    context->r14 = *(uint64_t *)(savedregs - ( 21 * 8 ));
-    context->r15 = *(uint64_t *)(savedregs - ( 22 * 8 ));
+    context->rax = *(uint64_t *)(savedregs - (  6 * 8 ));
+    context->rbx = *(uint64_t *)(savedregs - (  7 * 8 ));
+    context->rcx = *(uint64_t *)(savedregs - (  8 * 8 ));
+    context->rdx = *(uint64_t *)(savedregs - (  9 * 8 ));
+    context->rsi = *(uint64_t *)(savedregs - ( 10 * 8 ));
+    context->rdi = *(uint64_t *)(savedregs - ( 11 * 8 ));
     
-    context->ds  = *(uint16_t *)(savedregs - ( 23 * 8 ) + 0);
-    context->es  = *(uint16_t *)(savedregs - ( 23 * 8 ) + 2);
+    context->rbp = *(uint64_t *)(savedregs - ( 12 * 8 ));
     
-    context->fs  = *(uint64_t *)(savedregs - ( 23 * 8 ) + 4);
-    context->gs  = *(uint64_t *)(savedregs - ( 24 * 8 ) + 4);
+    context->r8  = *(uint64_t *)(savedregs - ( 13 * 8 ));
+    context->r9  = *(uint64_t *)(savedregs - ( 14 * 8 ));
+    context->r10 = *(uint64_t *)(savedregs - ( 15 * 8 ));
+    context->r11 = *(uint64_t *)(savedregs - ( 16 * 8 ));
+    context->r12 = *(uint64_t *)(savedregs - ( 17 * 8 ));
+    context->r13 = *(uint64_t *)(savedregs - ( 18 * 8 ));
+    context->r14 = *(uint64_t *)(savedregs - ( 19 * 8 ));
+    context->r15 = *(uint64_t *)(savedregs - ( 20 * 8 ));
+    
+    context->ds  = *(uint16_t *)(savedregs - ( 21 * 8 ));
+    context->es  = *(uint16_t *)(savedregs - ( 22 * 8 ));
+    
+    context->fs  = *(uint64_t *)(savedregs - ( 23 * 8 ));
+    context->gs  = *(uint64_t *)(savedregs - ( 24 * 8 ));
     
 }
 
@@ -356,32 +380,32 @@ void context_to_savedregs(struct RegisterContext *context, uint64_t savedregs)
     *(uint64_t *)(savedregs - ( 2 * 8 )) = context->rflags;
     *(uint64_t *)(savedregs - ( 3 * 8 )) = context->cs;
     *(uint64_t *)(savedregs - ( 4 * 8 )) = context->rip;
-    *(uint64_t *)(savedregs - ( 5 * 8 )) = context->retptr;
+    
 
-    *(uint64_t *)(savedregs - (  6 * 8 )) = context->interruptnumber;
+    *(uint64_t *)(savedregs - (  5 * 8 )) = context->interruptnumber;
 
-    *(uint64_t *)(savedregs - (  7 * 8 )) = context->rax;
-    *(uint64_t *)(savedregs - (  8 * 8 )) = context->rbx;
-    *(uint64_t *)(savedregs - (  9 * 8 )) = context->rcx;
-    *(uint64_t *)(savedregs - ( 10 * 8 )) = context->rdx;
-    *(uint64_t *)(savedregs - ( 11 * 8 )) = context->rsi;
-    *(uint64_t *)(savedregs - ( 12 * 8 )) = context->rdi;
-    *(uint64_t *)(savedregs - ( 13 * 8 )) = context->rsp2;
-    *(uint64_t *)(savedregs - ( 14 * 8 )) = context->rbp;
+    *(uint64_t *)(savedregs - (  6 * 8 )) = context->rax;
+    *(uint64_t *)(savedregs - (  7 * 8 )) = context->rbx;
+    *(uint64_t *)(savedregs - (  8 * 8 )) = context->rcx;
+    *(uint64_t *)(savedregs - (  9 * 8 )) = context->rdx;
+    *(uint64_t *)(savedregs - ( 10 * 8 )) = context->rsi;
+    *(uint64_t *)(savedregs - ( 11 * 8 )) = context->rdi;
+    
+    *(uint64_t *)(savedregs - ( 12 * 8 )) = context->rbp;
 
-    *(uint64_t *)(savedregs - ( 15 * 8 )) = context->r8;
-    *(uint64_t *)(savedregs - ( 16 * 8 )) = context->r9;
-    *(uint64_t *)(savedregs - ( 17 * 8 )) = context->r10;
-    *(uint64_t *)(savedregs - ( 18 * 8 )) = context->r11;
-    *(uint64_t *)(savedregs - ( 19 * 8 )) = context->r12;
-    *(uint64_t *)(savedregs - ( 20 * 8 )) = context->r13;
-    *(uint64_t *)(savedregs - ( 21 * 8 )) = context->r14;
-    *(uint64_t *)(savedregs - ( 22 * 8 )) = context->r15;
+    *(uint64_t *)(savedregs - ( 13 * 8 )) = context->r8;
+    *(uint64_t *)(savedregs - ( 14 * 8 )) = context->r9;
+    *(uint64_t *)(savedregs - ( 15 * 8 )) = context->r10;
+    *(uint64_t *)(savedregs - ( 16 * 8 )) = context->r11;
+    *(uint64_t *)(savedregs - ( 17 * 8 )) = context->r12;
+    *(uint64_t *)(savedregs - ( 18 * 8 )) = context->r13;
+    *(uint64_t *)(savedregs - ( 19 * 8 )) = context->r14;
+    *(uint64_t *)(savedregs - ( 20 * 8 )) = context->r15;
 
-    *(uint16_t *)(savedregs - ( 23 * 8 ) + 0) = context->ds;
-    *(uint16_t *)(savedregs - ( 23 * 8 ) + 2) = context->es;
+    *(uint16_t *)(savedregs - ( 21 * 8 )) = context->ds;
+    *(uint16_t *)(savedregs - ( 22 * 8 )) = context->es;
 
-    *(uint64_t *)(savedregs - ( 23 * 8 ) + 4) = context->fs;
-    *(uint64_t *)(savedregs - ( 24 * 8 ) + 4) = context->gs;
+    *(uint64_t *)(savedregs - ( 23 * 8 )) = context->fs;
+    *(uint64_t *)(savedregs - ( 24 * 8 )) = context->gs;
     
 }

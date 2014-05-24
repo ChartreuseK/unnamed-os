@@ -4,6 +4,22 @@
 
 #define NULL 0
 
+
+int strcmp(const char *s1, const char *s2)
+{
+    for(;*s1 == *s2; s1++, s2++)
+    {
+        if(*s1 == '\0') // Both strings terminated equal
+        {
+            return 0;
+        }
+    }
+    
+    // The strings were not equal
+    return *s1 - *s2;
+    
+}
+
 char *strtok(char *str, const char *delim)
 {
     static char *last = NULL;
@@ -25,7 +41,7 @@ char *strtok(char *str, const char *delim)
     
     if(!working) return NULL;
     
-    dprintf("str: '%s', delim: '%s'\n", str, delim);
+    
     
     // Now we need to strip of any leading delimiters
     for(;;working++)

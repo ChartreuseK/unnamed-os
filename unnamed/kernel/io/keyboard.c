@@ -176,8 +176,8 @@ void key_buff_add(uint8_t keycode)
 uint16_t key_buff_get_blk()
 {
     // Wait till we get something in our buffer
-    while(key_buff_count == 0);
-    
+    while(key_buff_count == 0){}
+  
     return key_buff[--key_buff_count];
     
     
@@ -185,7 +185,9 @@ uint16_t key_buff_get_blk()
 
 uint16_t getchar() // Lower byte is the ascii char, upper byte is modifier
 {
+    
     uint16_t keycode = key_buff_get_blk();
+    
     
     if( keycode & BIT(8) ) // Shift bit
     {
@@ -219,7 +221,10 @@ void ngets(char *str, int len)
 {
     for(int i = 0; i < len;)
     {
+        
         str[i] = getchar();
+        
+        
         
         if(str[i] == '\n')
         {

@@ -8,6 +8,7 @@
 
 
 void init_threads();
+void sleep_thread_self();
 void scheduler_event(uint64_t savedregs);
 uint32_t new_kthread( void (*function)(void), uint64_t stack_size );
 

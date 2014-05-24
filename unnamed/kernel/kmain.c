@@ -19,18 +19,17 @@
 #define WHT_ON_BLUE                 (uint8_t)0x1F
 #define OFFSET(x,y)                 ((y<<7)+(y<<5)+(x<<1))
 
+#define NULL						0
+
 void text_clrscr();
 void text_putxy(char *str, int x, int y, uint8_t attr);
 
 extern uint8_t keycode_to_ascii[];
 
-void testthread()
-{
-	while(1)
-	{
-		dprintf("I'm a thread!\n");
-	}
-}
+void kernel_main_thread();
+void testthread();
+void testthread2();
+void inputthread();
 
 void kmain(uint64_t  *mem) 
 {
@@ -46,15 +45,16 @@ void kmain(uint64_t  *mem)
     phymem_align_regions(mem);
     phymem_mark_all_free(mem);
 
+	// Write a \0 to address 0, so that a null pointer string is empty
+	phymem_write8(NULL, 0);
 	
     setup_gdt();
 
 	free(malloc(0x4010));
 	
     init_ps2_keyboard();
-    //init_threads();
     
-	setup_interrupts();
+	
 
 	dprintf("Hello world!\n");
 
@@ -79,27 +79,78 @@ void kmain(uint64_t  *mem)
 
 	char temp;
 
+	init_threads();
+    
+	new_kthread(&kernel_main_thread, 4096);
+
+	setup_interrupts();	
+	while(1);
+	
+}
+
+
+void kernel_main_thread()
+{
+	new_kthread(&testthread, 64);
+	new_kthread(&testthread2, 64);
+	new_kthread(&inputthread, 1024);
+	
+	// Now we put ourself to sleep since we have nothing left to do.
+	sleep_thread_self();
+	// Just incase we  somehow get out of sleep
+	while(1){__asm__("hlt");}
+}
+
+
+void testthread()
+{
+	
+	while(1);dprintf("I'm the first thread\n");
+}
+void testthread2()
+{
+	while(1);dprintf("I'm thread two\n");
+}
+void echothread()
+{
+	for(int i = 100; i > 0; i--) printf("I'm a thread %d\n",i);
+	
+}
+void inputthread()
+{
 	char input[512];
-
-	//new_kthread(&testthread, 512);
-
     while(1) 
     {
 		printf("> ");
+		
 		ngets(input, 512);
 		
-		for(char *token = strtok(input, " -"); token != NULL; token = strtok(NULL, " -"))
+		
+		char *command = strtok(input, " ");
+		if(strcmp(command, "exit") == 0)
 		{
-			printf("Token: %s\n", token);
+			printf("Disabling interrupts and halting\n");
+			__asm__("cli");
+			__asm__("hlt");
 		}
-		
-		
-		//printf("User entered: %s\n", input);
+		else if(strcmp(command, "echo") == 0)
+		{
+			printf("%s\n", strtok(NULL, ""));
+		}
+		else if(strcmp(command, "thread") == 0)
+		{
+			printf("Creating new test thread\n");
+			new_kthread(&echothread, 512);
+		}
 		
 		
 		
 	}
 }
+
+
+
+
 
 
 
